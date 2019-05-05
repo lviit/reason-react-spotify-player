@@ -2,44 +2,51 @@ open Webapi;
 
 [@bs.val] [@bs.scope ("window", "location")] external hash: string = "hash";
 
-/* State declaration */
+type item = {
+  id: string,
+  name: string,
+};
+
 type state = {
   count: int,
   show: bool,
+  data: item,
 };
+
+type response = {item};
 
 /* Action declaration */
 type action =
   | Click
-  | Toggle;
-
-type user = {
-  id: int,
-  name: string,
-};
+  | Toggle
+  | FetchData
+  | FetchDataFulfilled(response);
 
 module Decode = {
-  let user = user =>
+  let item = json =>
     Json.Decode.{
-      id: field("id", int, user),
-      name: field("name", string, user),
+      id: json |> field("id", string),
+      name: json |> field("name", string),
     };
-  let users = (json): list(user) => Json.Decode.list(user, json);
+
+  let response = json => Json.Decode.{item: json |> field("item", item)};
 };
 
 [@react.component]
-let make = (~greeting) => {
+let make = () => {
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>
         switch (action) {
         | Click => {...state, count: state.count + 1}
         | Toggle => {...state, show: !state.show}
+        | FetchDataFulfilled(data) => {...state, data: data.item} 
         },
-      {count: 0, show: true},
+      {count: 0, show: true, data: { id: "", name: ""}},
     );
 
-  React.useEffect(() => {
+  React.useEffect1(() => {
+    Js.log("fetching data");
     let url = Url.URLSearchParams.make(hash);
     let accessToken = Url.URLSearchParams.get("#access_token", url);
     let authHeader =
@@ -57,13 +64,11 @@ let make = (~greeting) => {
         ),
       )
       |> then_(Fetch.Response.json)
-      |> then_(json =>
-           json |> Decode.users |> (users => Some(users) |> resolve)
-         )
-      |> catch(_err => resolve(None))
+      |> then_(json => Decode.response(json) |> resolve)
+      |> then_(data => dispatch(FetchDataFulfilled(data)) |> resolve)
     );
     Some(() => ());
-  });
+  }, [||]);
 
   let authEndpoint = "https://accounts.spotify.com/authorize";
   let clientId = "64d03692241b478cb763ec2a7eed99e0";
@@ -80,6 +85,9 @@ let make = (~greeting) => {
 
   let message =
     "You've clicked this " ++ string_of_int(state.count) ++ " times(s)";
+
+  let text = "now playing" ++ state.data.name;
+
   <div>
     <button onClick={_event => dispatch(Click)}>
       {ReasonReact.string(message)}
@@ -87,6 +95,7 @@ let make = (~greeting) => {
     <button onClick={_event => dispatch(Toggle)}>
       {ReasonReact.string("Toggle greeting")}
     </button>
+    <h3>{ReasonReact.string(text)}</h3>
     <a
       className="btn btn--loginApp-link"
       href={

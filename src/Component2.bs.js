@@ -7,42 +7,68 @@ var React = require("react");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
 var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 
-function user(user$1) {
+function item(json) {
   return /* record */[
-          /* id */Json_decode.field("id", Json_decode.$$int, user$1),
-          /* name */Json_decode.field("name", Json_decode.string, user$1)
+          /* id */Json_decode.field("id", Json_decode.string, json),
+          /* name */Json_decode.field("name", Json_decode.string, json)
         ];
 }
 
-function users(json) {
-  return Json_decode.list(user, json);
+function response(json) {
+  return /* record */[/* item */Json_decode.field("item", item, json)];
 }
 
 var Decode = /* module */[
-  /* user */user,
-  /* users */users
+  /* item */item,
+  /* response */response
 ];
 
 function Component2(Props) {
-  Props.greeting;
   var match = React.useReducer((function (state, action) {
-          if (action) {
-            return /* record */[
-                    /* count */state[/* count */0],
-                    /* show */!state[/* show */1]
-                  ];
+          if (typeof action === "number") {
+            switch (action) {
+              case 0 : 
+                  return /* record */[
+                          /* count */state[/* count */0] + 1 | 0,
+                          /* show */state[/* show */1],
+                          /* data */state[/* data */2]
+                        ];
+              case 1 : 
+                  return /* record */[
+                          /* count */state[/* count */0],
+                          /* show */!state[/* show */1],
+                          /* data */state[/* data */2]
+                        ];
+              case 2 : 
+                  throw [
+                        Caml_builtin_exceptions.match_failure,
+                        /* tuple */[
+                          "Component2.re",
+                          40,
+                          8
+                        ]
+                      ];
+              
+            }
           } else {
             return /* record */[
-                    /* count */state[/* count */0] + 1 | 0,
-                    /* show */state[/* show */1]
+                    /* count */state[/* count */0],
+                    /* show */state[/* show */1],
+                    /* data */action[0][/* item */0]
                   ];
           }
         }), /* record */[
         /* count */0,
-        /* show */true
+        /* show */true,
+        /* data : record */[
+          /* id */"",
+          /* name */""
+        ]
       ]);
   var dispatch = match[1];
+  var state = match[0];
   React.useEffect((function () {
+          console.log("fetching data");
           var url = new URLSearchParams(window.location.hash);
           var accessToken = url.get("#access_token");
           var authHeader = (accessToken == null) ? "none" : "Bearer " + accessToken;
@@ -51,15 +77,14 @@ function Component2(Props) {
                           }, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0)).then((function (prim) {
                       return prim.json();
                     })).then((function (json) {
-                    var users = Json_decode.list(user, json);
-                    return Promise.resolve(users);
-                  })).catch((function (_err) {
-                  return Promise.resolve(undefined);
+                    return Promise.resolve(response(json));
+                  })).then((function (data) {
+                  return Promise.resolve(Curry._1(dispatch, /* FetchDataFulfilled */[data]));
                 }));
           return (function (param) {
                     return /* () */0;
                   });
-        }));
+        }), /* array */[]);
   var join = function ($$char, list) {
     if (list) {
       var tail = list[1];
@@ -76,7 +101,8 @@ function Component2(Props) {
           ];
     }
   };
-  var message = "You've clicked this " + (String(match[0][/* count */0]) + " times(s)");
+  var message = "You've clicked this " + (String(state[/* count */0]) + " times(s)");
+  var text = "now playing" + state[/* data */2][/* name */1];
   return React.createElement("div", undefined, React.createElement("button", {
                   onClick: (function (_event) {
                       return Curry._1(dispatch, /* Click */0);
@@ -85,7 +111,7 @@ function Component2(Props) {
                   onClick: (function (_event) {
                       return Curry._1(dispatch, /* Toggle */1);
                     })
-                }, "Toggle greeting"), React.createElement("a", {
+                }, "Toggle greeting"), React.createElement("h3", undefined, text), React.createElement("a", {
                   className: "btn btn--loginApp-link",
                   href: "https://accounts.spotify.com/authorize?client_id=64d03692241b478cb763ec2a7eed99e0&redirect_uri=http://localhost:8000&scope=" + (join("%20", /* :: */[
                           "user-read-currently-playing",
