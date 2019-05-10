@@ -1,6 +1,4 @@
-open Webapi;
-
-[@bs.val] [@bs.scope ("window", "location")] external hash: string = "hash";
+open Utils;
 
 type item = {
   id: string,
@@ -11,6 +9,7 @@ type state = {
   count: int,
   show: bool,
   data: item,
+  loading: bool,
 };
 
 type response = {item};
@@ -19,7 +18,7 @@ type response = {item};
 type action =
   | Click
   | Toggle
-  | FetchData
+  | FetchDataPending
   | FetchDataFulfilled(response);
 
 module Decode = {
@@ -33,59 +32,53 @@ module Decode = {
 };
 
 [@react.component]
-let make = () => {
+let make = (~authHeader) => {
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>
         switch (action) {
         | Click => {...state, count: state.count + 1}
         | Toggle => {...state, show: !state.show}
-        | FetchDataFulfilled(data) => {...state, data: data.item} 
+        | FetchDataPending => {...state, loading: true}
+        | FetchDataFulfilled(data) => {
+            ...state,
+            loading: false,
+            data: data.item,
+          }
         },
-      {count: 0, show: true, data: { id: "", name: ""}},
+      {
+        count: 0,
+        show: true,
+        loading: false,
+        data: {
+          id: "",
+          name: "",
+        },
+      },
     );
 
-  React.useEffect1(() => {
-    Js.log("fetching data");
-    let url = Url.URLSearchParams.make(hash);
-    let accessToken = Url.URLSearchParams.get("#access_token", url);
-    let authHeader =
-      switch (accessToken) {
-      | None => "none"
-      | Some(accessToken) => "Bearer " ++ accessToken
-      };
+  React.useEffect1(
+    () => {
+      dispatch(FetchDataPending);
 
-    Js.Promise.(
-      Fetch.fetchWithInit(
-        "https://api.spotify.com/v1/me/player",
-        Fetch.RequestInit.make(
-          ~headers=Fetch.HeadersInit.make({"Authorization": authHeader}),
-          (),
-        ),
+      Js.Promise.(
+        fetchWithAuth("https://api.spotify.com/v1/me/player", authHeader)
+        |> then_(Fetch.Response.json)
+        |> then_(json => json |> Decode.response |> resolve)
+        |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
       )
-      |> then_(Fetch.Response.json)
-      |> then_(json => Decode.response(json) |> resolve)
-      |> then_(data => dispatch(FetchDataFulfilled(data)) |> resolve)
-    );
-    Some(() => ());
-  }, [||]);
+      |> ignore;
+      Some(() => ());
+    },
+    [||],
+  );
 
   let authEndpoint = "https://accounts.spotify.com/authorize";
   let clientId = "64d03692241b478cb763ec2a7eed99e0";
   let redirectUri = "http://localhost:8000";
   let scopes = ["user-read-currently-playing", "user-read-playback-state"];
-
-  let rec join = (char: string, list: list(string)): string => {
-    switch (list) {
-    | [] => raise(Failure("Passed an empty list"))
-    | [tail] => tail
-    | [head, ...tail] => head ++ char ++ join(char, tail)
-    };
-  };
-
   let message =
     "You've clicked this " ++ string_of_int(state.count) ++ " times(s)";
-
   let text = "now playing" ++ state.data.name;
 
   <div>
@@ -95,7 +88,8 @@ let make = () => {
     <button onClick={_event => dispatch(Toggle)}>
       {ReasonReact.string("Toggle greeting")}
     </button>
-    <h3>{ReasonReact.string(text)}</h3>
+    <div> {state.loading ? ReasonReact.string("...loading") : <div />} </div>
+    <h3> {ReasonReact.string(text)} </h3>
     <a
       className="btn btn--loginApp-link"
       href={

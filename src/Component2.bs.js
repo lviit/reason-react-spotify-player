@@ -2,10 +2,9 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Fetch = require("bs-fetch/src/Fetch.js");
 var React = require("react");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
-var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
+var Utils$ReactHooksTemplate = require("./Utils.bs.js");
 
 function item(json) {
   return /* record */[
@@ -24,6 +23,7 @@ var Decode = /* module */[
 ];
 
 function Component2(Props) {
+  var authHeader = Props.authHeader;
   var match = React.useReducer((function (state, action) {
           if (typeof action === "number") {
             switch (action) {
@@ -31,30 +31,31 @@ function Component2(Props) {
                   return /* record */[
                           /* count */state[/* count */0] + 1 | 0,
                           /* show */state[/* show */1],
-                          /* data */state[/* data */2]
+                          /* data */state[/* data */2],
+                          /* loading */state[/* loading */3]
                         ];
               case 1 : 
                   return /* record */[
                           /* count */state[/* count */0],
                           /* show */!state[/* show */1],
-                          /* data */state[/* data */2]
+                          /* data */state[/* data */2],
+                          /* loading */state[/* loading */3]
                         ];
               case 2 : 
-                  throw [
-                        Caml_builtin_exceptions.match_failure,
-                        /* tuple */[
-                          "Component2.re",
-                          40,
-                          8
-                        ]
-                      ];
+                  return /* record */[
+                          /* count */state[/* count */0],
+                          /* show */state[/* show */1],
+                          /* data */state[/* data */2],
+                          /* loading */true
+                        ];
               
             }
           } else {
             return /* record */[
                     /* count */state[/* count */0],
                     /* show */state[/* show */1],
-                    /* data */action[0][/* item */0]
+                    /* data */action[0][/* item */0],
+                    /* loading */false
                   ];
           }
         }), /* record */[
@@ -63,18 +64,14 @@ function Component2(Props) {
         /* data : record */[
           /* id */"",
           /* name */""
-        ]
+        ],
+        /* loading */false
       ]);
   var dispatch = match[1];
   var state = match[0];
   React.useEffect((function () {
-          console.log("fetching data");
-          var url = new URLSearchParams(window.location.hash);
-          var accessToken = url.get("#access_token");
-          var authHeader = (accessToken == null) ? "none" : "Bearer " + accessToken;
-          fetch("https://api.spotify.com/v1/me/player", Fetch.RequestInit[/* make */0](undefined, {
-                            Authorization: authHeader
-                          }, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0)).then((function (prim) {
+          Curry._1(dispatch, /* FetchDataPending */2);
+          Utils$ReactHooksTemplate.fetchWithAuth("https://api.spotify.com/v1/me/player", authHeader).then((function (prim) {
                       return prim.json();
                     })).then((function (json) {
                     return Promise.resolve(response(json));
@@ -85,24 +82,9 @@ function Component2(Props) {
                     return /* () */0;
                   });
         }), /* array */[]);
-  var join = function ($$char, list) {
-    if (list) {
-      var tail = list[1];
-      var tail$1 = list[0];
-      if (tail) {
-        return tail$1 + ($$char + join($$char, tail));
-      } else {
-        return tail$1;
-      }
-    } else {
-      throw [
-            Caml_builtin_exceptions.failure,
-            "Passed an empty list"
-          ];
-    }
-  };
   var message = "You've clicked this " + (String(state[/* count */0]) + " times(s)");
   var text = "now playing" + state[/* data */2][/* name */1];
+  var match$1 = state[/* loading */3];
   return React.createElement("div", undefined, React.createElement("button", {
                   onClick: (function (_event) {
                       return Curry._1(dispatch, /* Click */0);
@@ -111,9 +93,9 @@ function Component2(Props) {
                   onClick: (function (_event) {
                       return Curry._1(dispatch, /* Toggle */1);
                     })
-                }, "Toggle greeting"), React.createElement("h3", undefined, text), React.createElement("a", {
+                }, "Toggle greeting"), React.createElement("div", undefined, match$1 ? "...loading" : React.createElement("div", undefined)), React.createElement("h3", undefined, text), React.createElement("a", {
                   className: "btn btn--loginApp-link",
-                  href: "https://accounts.spotify.com/authorize?client_id=64d03692241b478cb763ec2a7eed99e0&redirect_uri=http://localhost:8000&scope=" + (join("%20", /* :: */[
+                  href: "https://accounts.spotify.com/authorize?client_id=64d03692241b478cb763ec2a7eed99e0&redirect_uri=http://localhost:8000&scope=" + (Utils$ReactHooksTemplate.join("%20", /* :: */[
                           "user-read-currently-playing",
                           /* :: */[
                             "user-read-playback-state",

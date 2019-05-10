@@ -17,7 +17,9 @@
     "reason-react",
     "bs-webapi",
     "bs-fetch",
-    "@glennsl/bs-json"
+    "@glennsl/bs-json",
+    "bs-emotion"
   ],
-  "refmt": 3
+  "refmt": 3,
+  "ppx-flags": ["bs-emotion-ppx/ppx"]
 }
