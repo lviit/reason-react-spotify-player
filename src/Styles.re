@@ -1,0 +1,1 @@
+let bgColor = "F6F4F4";

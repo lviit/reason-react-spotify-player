@@ -644,6 +644,13 @@ browserify-zlib@^0.2.0:
   dependencies:
     pako "~1.0.5"
 
+bs-css@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/bs-css/-/bs-css-8.0.4.tgz#3fee97b2261734be56f67ee7e444dbae3a99d15b"
+  integrity sha512-03kgfSF2xs6VSurBn92yjkjIZl+U5gScleuU5fUeJelqY85ipqZpTt+npaGJcSyoUJqePR8Bzu2zsF8kJiwB6w==
+  dependencies:
+    emotion "^9.2.12"
+
 bs-emotion-ppx@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/bs-emotion-ppx/-/bs-emotion-ppx-0.0.6.tgz#e11f6b36e8b2731457f99e70beb90b09b2af8d2a"
@@ -1368,7 +1375,7 @@ emojis-list@^2.0.0:
   resolved "https://registry.yarnpkg.com/emojis-list/-/emojis-list-2.1.0.tgz#4daa4d9db00f9819880c79fa457ae5b09a1fd389"
   integrity sha1-TapNnbAPmBmIDHn6RXrlsJof04k=
 
-emotion@9.2.12:
+emotion@9.2.12, emotion@^9.2.12:
   version "9.2.12"
   resolved "https://registry.yarnpkg.com/emotion/-/emotion-9.2.12.tgz#53925aaa005614e65c6e43db8243c843574d1ea9"
   integrity sha512-hcx7jppaI8VoXxIWEhxpDW7I+B4kq9RNzQLmsrF6LY8BGKqe2N+gFAQr0EfuFucFlPs2A9HM4+xNj4NeqEWIOQ==

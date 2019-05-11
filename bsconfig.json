@@ -18,8 +18,7 @@
     "bs-webapi",
     "bs-fetch",
     "@glennsl/bs-json",
-    "bs-emotion"
+    "bs-css"
   ],
-  "refmt": 3,
-  "ppx-flags": ["bs-emotion-ppx/ppx"]
+  "refmt": 3
 }

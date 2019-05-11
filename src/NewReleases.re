@@ -1,36 +1,47 @@
 open Utils;
 
-type album = {
-  name: string,
-  release_date: string,
-  id: string,
-};
-type albums = {items: list(album)};
-type response = {albums};
-
 type state = {
   count: int,
   show: bool,
-  data: list(album),
+  data: list(AlbumData.album),
   loading: bool,
 };
 
 type action =
   | FetchDataPending
-  | FetchDataFulfilled(response);
+  | FetchDataFulfilled(AlbumData.response);
 
-module Decode = {
-  let album = json =>
-    Json.Decode.{
-      name: json |> field("name", string),
-      release_date: json |> field("release_date", string),
-      id: json |> field("id", string),
-    };
+module Styles = {
+  open Css;
 
-  let albums = json => Json.Decode.{items: json |> field("items", list(album))};
+  let title =
+    style([
+      fontSize(rem(2.0)),
+    ]);
 
-  let response = json =>
-    Json.Decode.{albums: json |> field("albums", albums)};
+  let container =
+    style([
+      display(`grid),
+      gridTemplateRows([`auto]),
+      gridTemplateColumns([px(300), px(300), px(300)]),
+      gridGap(px(30)),
+    ]);
+
+  global(
+    "body",
+    [
+      margin(px(100)),
+      padding(px(100)),
+      /*
+       fontFace(
+         ~fontFamily=fontFamily("IBM Plex Sans"),
+         ~src=[`url("https://fonts.googleapis.com/css?family=IBM+Plex+Sans")],
+         ~fontWeight=`normal,
+         ~fontStyle=`normal,
+         ()
+       ), */
+    ],
+  );
 };
 
 [@react.component]
@@ -59,7 +70,7 @@ let make = (~authHeader) => {
           authHeader,
         )
         |> then_(Fetch.Response.json)
-        |> then_(json => json |> Decode.response |> resolve)
+        |> then_(json => json |> AlbumData.Decode.response |> resolve)
         |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
       )
       |> ignore;
@@ -69,6 +80,14 @@ let make = (~authHeader) => {
   );
 
   <div>
+    <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
+    <div className=Styles.container>
+      {List.length(state.data) > 0
+         ? List.map(album => <Album album />, state.data)
+           |> Array.of_list
+           |> ReasonReact.array
+         : ReasonReact.string("No data available.")}
+    </div>
     <div> {state.loading ? ReasonReact.string("...loading") : <div />} </div>
   </div>;
 };
