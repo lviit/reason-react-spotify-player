@@ -14,15 +14,12 @@ type action =
 module Styles = {
   open Css;
 
-  let title =
-    style([
-      fontSize(rem(2.0)),
-    ]);
+  let title = style([fontSize(px(60))]);
 
   let container =
     style([
       display(`grid),
-      gridTemplateRows([`auto]),
+      gridAutoRows(px(300)),
       gridTemplateColumns([px(300), px(300), px(300)]),
       gridGap(px(30)),
     ]);
@@ -30,16 +27,7 @@ module Styles = {
   global(
     "body",
     [
-      margin(px(100)),
-      padding(px(100)),
-      /*
-       fontFace(
-         ~fontFamily=fontFamily("IBM Plex Sans"),
-         ~src=[`url("https://fonts.googleapis.com/css?family=IBM+Plex+Sans")],
-         ~fontWeight=`normal,
-         ~fontStyle=`normal,
-         ()
-       ), */
+      fontFamily("IBM Plex Sans"),
     ],
   );
 };
