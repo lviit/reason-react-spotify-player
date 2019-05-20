@@ -11,7 +11,8 @@ type album = {
   release_date: string,
   id: string,
   images: list(image),
-  artists: list(artist)
+  artists: list(artist),
+  uri: string,
 };
 
 type albums = {items: list(album)};
@@ -33,7 +34,8 @@ module Decode = {
       release_date: json |> field("release_date", string),
       id: json |> field("id", string),
       images: json |> field("images", list(image)),
-      artists: json |> field("artists", list(artist))
+      artists: json |> field("artists", list(artist)),
+      uri: json |> field("uri", string)
     };
 
   let albums = json =>

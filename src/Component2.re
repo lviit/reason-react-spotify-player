@@ -76,7 +76,14 @@ let make = (~authHeader) => {
   let authEndpoint = "https://accounts.spotify.com/authorize";
   let clientId = "64d03692241b478cb763ec2a7eed99e0";
   let redirectUri = "http://localhost:8000";
-  let scopes = ["user-read-currently-playing", "user-read-playback-state"];
+  let scopes = [
+    "user-read-currently-playing",
+    "user-read-playback-state",
+    "streaming",
+    "user-read-birthdate",
+    "user-read-email",
+    "user-read-private",
+  ];
   let message =
     "You've clicked this " ++ string_of_int(state.count) ++ " times(s)";
   let text = "now playing" ++ state.data.name;

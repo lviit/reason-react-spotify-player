@@ -99,7 +99,19 @@ function Component2(Props) {
                           "user-read-currently-playing",
                           /* :: */[
                             "user-read-playback-state",
-                            /* [] */0
+                            /* :: */[
+                              "streaming",
+                              /* :: */[
+                                "user-read-birthdate",
+                                /* :: */[
+                                  "user-read-email",
+                                  /* :: */[
+                                    "user-read-private",
+                                    /* [] */0
+                                  ]
+                                ]
+                              ]
+                            ]
                           ]
                         ]) + "&response_type=token&show_dialog=true")
                 }, "Login to Spotify"));

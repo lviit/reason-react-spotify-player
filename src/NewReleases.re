@@ -33,7 +33,7 @@ module Styles = {
 };
 
 [@react.component]
-let make = (~authHeader) => {
+let make = (~authHeader, ~deviceId) => {
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>
@@ -71,7 +71,7 @@ let make = (~authHeader) => {
     <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
     <div className=Styles.container>
       {List.length(state.data) > 0
-         ? List.map(album => <Album album />, state.data)
+         ? List.map(album => <Album album authHeader deviceId/>, state.data)
            |> Array.of_list
            |> ReasonReact.array
          : ReasonReact.string("No data available.")}

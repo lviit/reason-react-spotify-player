@@ -1,3 +1,5 @@
+open Utils;
+
 module Styles = {
   open Css;
   open Styles;
@@ -12,6 +14,7 @@ module Styles = {
       display(`flex),
       flexDirection(`column),
       justifyContent(`flexEnd),
+      cursor(`pointer),
     ]);
 
   let title =
@@ -36,11 +39,42 @@ module Styles = {
 
 [@react.component]
 let make =
-    (~album as {name, id, images, artists}: AlbumData.album) => {
+    (
+      ~album as {name, id, images, artists, uri}: AlbumData.album,
+      ~authHeader,
+      ~deviceId,
+    ) => {
+  let (play, setPlay) = React.useState(() => "");
+
+  React.useEffect1(
+    () => {
+
+    if (play !== "") {
+        let payload = Js.Dict.empty();
+        Js.Dict.set(payload, "context_uri", Js.Json.string(play));
+
+        Js.Promise.(
+          putWithAuth(
+            "https://api.spotify.com/v1/me/player/play?device_id=" ++ deviceId,
+            authHeader,
+            payload,
+          )
+          |> then_(resolve)
+        )
+        |> ignore;
+    }
+      Some(() => ());
+    },
+    [|play|],
+  );
+
   let image = List.hd(images);
   let artist = List.hd(artists);
 
-  <div className={Styles.container(image)} key=id>
+  <div
+    className={Styles.container(image)}
+    key=id
+    onClick={_event => setPlay(_ => uri)}>
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>
       <span> {React.string(artist.name)} </span>
