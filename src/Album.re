@@ -1,4 +1,5 @@
 open Utils;
+open SettingsProvider;
 
 module Styles = {
   open Css;
@@ -44,37 +45,14 @@ let make =
       ~authHeader,
       ~deviceId,
     ) => {
-  let (play, setPlay) = React.useState(() => "");
-
-  React.useEffect1(
-    () => {
-
-    if (play !== "") {
-        let payload = Js.Dict.empty();
-        Js.Dict.set(payload, "context_uri", Js.Json.string(play));
-
-        Js.Promise.(
-          putWithAuth(
-            "https://api.spotify.com/v1/me/player/play?device_id=" ++ deviceId,
-            authHeader,
-            payload,
-          )
-          |> then_(resolve)
-        )
-        |> ignore;
-    }
-      Some(() => ());
-    },
-    [|play|],
-  );
-
+  let (_, dispatch) = React.useContext(settingsContext);
   let image = List.hd(images);
   let artist = List.hd(artists);
 
   <div
     className={Styles.container(image)}
     key=id
-    onClick={_event => setPlay(_ => uri)}>
+    onClick={_event => dispatch(Play(uri))}>
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>
       <span> {React.string(artist.name)} </span>

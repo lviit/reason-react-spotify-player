@@ -1,16 +1,4 @@
-open Utils;
 open SettingsProvider;
-
-type state = {
-  count: int,
-  show: bool,
-  data: list(AlbumData.album),
-  loading: bool,
-};
-
-type action =
-  | FetchDataPending
-  | FetchDataFulfilled(AlbumData.response);
 
 module Styles = {
   open Css;
@@ -30,45 +18,13 @@ module Styles = {
 
 [@react.component]
 let make = () => {
-  let { authHeader, deviceId } = React.useContext(settingsContext);
-  let (state, dispatch) =
-    React.useReducer(
-      (state, action) =>
-        switch (action) {
-        | FetchDataPending => {...state, loading: true}
-        | FetchDataFulfilled(data) => {
-            ...state,
-            loading: false,
-            data: data.albums.items,
-          }
-        },
-      {count: 0, show: true, loading: false, data: []},
-    );
-
-  React.useEffect1(
-    () => {
-      dispatch(FetchDataPending);
-
-      Js.Promise.(
-        fetchWithAuth(
-          "https://api.spotify.com/v1/browse/new-releases",
-          authHeader,
-        )
-        |> then_(Fetch.Response.json)
-        |> then_(json => json |> AlbumData.Decode.response |> resolve)
-        |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
-      )
-      |> ignore;
-      Some(() => ());
-    },
-    [||],
-  );
+  let (state, _) = React.useContext(settingsContext);
 
   <div>
     <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
     <div className=Styles.container>
-      {List.length(state.data) > 0
-         ? List.map(album => <Album album authHeader deviceId />, state.data)
+      {List.length(state.albumData) > 0
+         ? List.map(album => <Album album authHeader deviceId />, state.albumData)
            |> Array.of_list
            |> ReasonReact.array
          : ReasonReact.string("No data available.")}
