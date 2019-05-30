@@ -33,7 +33,7 @@ let make = () => {
       (state, action) =>
         switch (action) {
         | PlayerLoading => {...state, loading: true}
-        | PlayerReady(id) => {...state, loading: false, deviceId: id}
+        | PlayerReady(id) => {loading: false, deviceId: id}
         },
       {loading: false, deviceId: ""},
     );
@@ -45,7 +45,8 @@ let make = () => {
       //initSpotifyPlayer();
 
       // TODO: handle with proper bindings
-      [%bs.raw {| 
+      %bs.raw
+      {|
         window.onSpotifyWebPlaybackSDKReady = () => {
           const url = new URLSearchParams(window.location.hash);
           const token = url.get("#access_token");
@@ -67,12 +68,16 @@ let make = () => {
             console.log('Device ID has gone offline', device_id);
           });
           player.connect().then(success => player.togglePlay());
-        } 
-       |}];
+        }
+       |};
 
       Some(() => ());
     },
     [||],
   );
-  <div> <Component2 authHeader /> <NewReleases authHeader deviceId /> </div>;
+  <div>
+    <Player authHeader />
+    <LoginButton />
+    <NewReleases authHeader deviceId />
+  </div>;
 };

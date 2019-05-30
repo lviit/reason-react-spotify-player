@@ -6,18 +6,16 @@ type item = {
 };
 
 type state = {
-  count: int,
-  show: bool,
   data: item,
   loading: bool,
+  playing: bool,
 };
 
 type response = {item};
 
 /* Action declaration */
 type action =
-  | Click
-  | Toggle
+  | TogglePlay
   | FetchDataPending
   | FetchDataFulfilled(response);
 
@@ -37,8 +35,7 @@ let make = (~authHeader) => {
     React.useReducer(
       (state, action) =>
         switch (action) {
-        | Click => {...state, count: state.count + 1}
-        | Toggle => {...state, show: !state.show}
+        | TogglePlay => {...state, playing: !state.playing}
         | FetchDataPending => {...state, loading: true}
         | FetchDataFulfilled(data) => {
             ...state,
@@ -47,9 +44,8 @@ let make = (~authHeader) => {
           }
         },
       {
-        count: 0,
-        show: true,
         loading: false,
+        playing: false,
         data: {
           id: "",
           name: "",
@@ -70,46 +66,45 @@ let make = (~authHeader) => {
       |> ignore;
       Some(() => ());
     },
-    [||],
+    [|state.playing|],
   );
 
-  let authEndpoint = "https://accounts.spotify.com/authorize";
-  let clientId = "64d03692241b478cb763ec2a7eed99e0";
-  let redirectUri = "http://localhost:8000";
-  let scopes = [
-    "user-read-currently-playing",
-    "user-read-playback-state",
-    "streaming",
-    "user-read-birthdate",
-    "user-read-email",
-    "user-read-private",
-  ];
-  let message =
-    "You've clicked this " ++ string_of_int(state.count) ++ " times(s)";
+  React.useEffect1(
+    () => {
+      Js.log("play toggle effect firing");
+      let url = "https://api.spotify.com/v1/me/player/" ++ (state.playing ? "pause" : "play");
+      Js.Promise.(
+        Fetch.fetchWithInit(
+          url,
+          Fetch.RequestInit.make(
+            ~headers=Fetch.HeadersInit.make({"Authorization": authHeader}),
+            ~method_=Put,
+            (),
+          ),
+        )
+        |> then_(resolve)
+      )
+      |> ignore;
+      Some(() => ());
+    },
+    [|state.playing|],
+  );
+
+  //React.useContext
+
   let text = "now playing" ++ state.data.name;
 
   <div>
-    <button onClick={_event => dispatch(Click)}>
-      {ReasonReact.string(message)}
+    <button onClick={_event => dispatch(TogglePlay)}>
+      {ReasonReact.string("previous")}
     </button>
-    <button onClick={_event => dispatch(Toggle)}>
-      {ReasonReact.string("Toggle greeting")}
+    <button onClick={_event => dispatch(TogglePlay)}>
+      {ReasonReact.string(state.playing ? "pause" : "play")}
+    </button>
+    <button onClick={_event => dispatch(TogglePlay)}>
+      {ReasonReact.string("next")}
     </button>
     <div> {state.loading ? ReasonReact.string("...loading") : <div />} </div>
     <h3> {ReasonReact.string(text)} </h3>
-    <a
-      className="btn btn--loginApp-link"
-      href={
-        authEndpoint
-        ++ "?client_id="
-        ++ clientId
-        ++ "&redirect_uri="
-        ++ redirectUri
-        ++ "&scope="
-        ++ join("%20", scopes)
-        ++ "&response_type=token&show_dialog=true"
-      }>
-      {ReasonReact.string("Login to Spotify")}
-    </a>
   </div>;
 };
