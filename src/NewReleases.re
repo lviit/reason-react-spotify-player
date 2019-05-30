@@ -1,4 +1,5 @@
 open Utils;
+open SettingsProvider;
 
 type state = {
   count: int,
@@ -24,16 +25,12 @@ module Styles = {
       gridGap(px(30)),
     ]);
 
-  global(
-    "body",
-    [
-      fontFamily("IBM Plex Sans"),
-    ],
-  );
+  global("body", [fontFamily("IBM Plex Sans")]);
 };
 
 [@react.component]
-let make = (~authHeader, ~deviceId) => {
+let make = () => {
+  let { authHeader, deviceId } = React.useContext(settingsContext);
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>
@@ -71,7 +68,7 @@ let make = (~authHeader, ~deviceId) => {
     <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
     <div className=Styles.container>
       {List.length(state.data) > 0
-         ? List.map(album => <Album album authHeader deviceId/>, state.data)
+         ? List.map(album => <Album album authHeader deviceId />, state.data)
            |> Array.of_list
            |> ReasonReact.array
          : ReasonReact.string("No data available.")}

@@ -1,4 +1,5 @@
 open Utils;
+open SettingsProvider;
 
 type item = {
   id: string,
@@ -30,7 +31,9 @@ module Decode = {
 };
 
 [@react.component]
-let make = (~authHeader) => {
+let make = () => {
+  let { authHeader } = React.useContext(settingsContext);
+
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>

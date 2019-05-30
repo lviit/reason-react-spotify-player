@@ -1,8 +1,3 @@
-open Webapi;
-
-[@bs.val] [@bs.scope ("window", "location")] external hash: string = "hash";
-//[@bs.new] [@bs.scope ("Spotify")] external initSpotifyPlayer : unit => unit = "Player";
-
 type state = {
   loading: bool,
   deviceId: string,
@@ -14,20 +9,6 @@ type action =
 
 [@react.component]
 let make = () => {
-  let url = Url.URLSearchParams.make(hash);
-  let accessToken = Url.URLSearchParams.get("#access_token", url);
-  let authHeader =
-    switch (accessToken) {
-    | None => "none"
-    | Some(accessToken) => "Bearer " ++ accessToken
-    };
-
-  let deviceId =
-    switch (Url.URLSearchParams.get("device_id", url)) {
-    | None => "none"
-    | Some(deviceId) => deviceId
-    };
-
   let (state, dispatch) =
     React.useReducer(
       (state, action) =>
@@ -75,9 +56,10 @@ let make = () => {
     },
     [||],
   );
-  <div>
-    <Player authHeader />
-    <LoginButton />
-    <NewReleases authHeader deviceId />
-  </div>;
+
+    <SettingsProvider>
+      <Player />
+      <LoginButton />
+      <NewReleases />
+    </SettingsProvider>;
 };
