@@ -1,18 +1,28 @@
-open Utils;
-
 module Styles = {
   open Css;
 
-  let container =
+  let titleBar =
     style([
       padding(px(10)),
       backgroundColor(hex("DB4D3F")),
+      display(`flex),
+      justifyContent(`spaceBetween),
+      boxSizing(`borderBox),
+    ]);
+
+    let controls =
+    style([
+      backgroundColor(hex("B03D32")),
+      display(`flex),
+      justifyContent(`flexEnd),
+      boxSizing(`borderBox),
+    ]);
+
+  let container =
+    style([
       position(`fixed),
       width(`percent(100.0)),
       zIndex(10),
-      display(`flex),
-      justifyContent(`spaceBetween),
-      boxSizing(`borderBox)
     ]);
 
   let title =
@@ -29,9 +39,12 @@ module Styles = {
 [@react.component]
 let make = () => {
   <div className=Styles.container>
-    <h1 className=Styles.title>
-      {ReasonReact.string("Reason Spotify client")}
-    </h1>
-    <LoginButton />
+    <div className=Styles.titleBar>
+      <h1 className=Styles.title>
+        {ReasonReact.string("Reason Spotify client")}
+      </h1>
+      <LoginButton />
+    </div>
+    <div className=Styles.controls> <Player /> <Visualizer /> </div>
   </div>;
 };

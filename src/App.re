@@ -78,6 +78,6 @@ let make = () => {
 
   <SettingsProvider>
     <Header />
-    <div className=Styles.main> <Player /> <NewReleases /> </div>
+    <div className=Styles.main>  <NewReleases /> </div>
   </SettingsProvider>;
 };
