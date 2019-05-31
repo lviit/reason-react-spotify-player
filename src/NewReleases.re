@@ -3,7 +3,13 @@ open SettingsProvider;
 module Styles = {
   open Css;
 
-  let title = style([fontSize(px(60))]);
+  let title =
+    style([
+      fontSize(px(80)),
+      fontWeight(`num(500)),
+      letterSpacing(px(1)),
+      textAlign(`center)
+    ]);
 
   let container =
     style([
@@ -26,13 +32,10 @@ let make = () => {
   let (state, _) = React.useContext(settingsContext);
 
   <div>
-    <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
+    <h1 className=Styles.title> {ReasonReact.string("New releases")} </h1>
     <div className=Styles.container>
       {List.length(state.albumData) > 0
-         ? List.map(
-             album => <Album album />,
-             state.albumData,
-           )
+         ? List.map(album => <Album album />, state.albumData)
            |> Array.of_list
            |> ReasonReact.array
          : ReasonReact.string("No data available.")}

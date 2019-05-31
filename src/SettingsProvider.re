@@ -8,9 +8,15 @@ type settings = {
   deviceId: string,
 };
 
+type artist = {
+  name: string
+}
+
 type item = {
   id: string,
   name: string,
+  progress_ms: int,
+  artists: list(artist)
 };
 
 type state = {
@@ -48,10 +54,17 @@ type action =
   | FetchAlbumDataFulfilled(AlbumData.response);
 
 module Decode = {
+  let artist = json =>
+    Json.Decode.{
+      name: json |> field("name", string),
+    };
+
   let item = json =>
     Json.Decode.{
       id: json |> field("id", string),
       name: json |> field("name", string),
+      progress_ms: json |> field("progress_ms", int),
+      artists: json |> field("artists", list(artist))
     };
 
   let response = json => Json.Decode.{item: json |> field("item", item)};
@@ -77,6 +90,8 @@ let initialState = {
   data: {
     id: "",
     name: "",
+    progress_ms: 0,
+    artists: [],
   },
   albumDataLoading: false,
   albumData: [],
@@ -97,23 +112,6 @@ module Provider = {
 let make = (~children) => {
   let (state, dispatch) = React.useReducer(reducer, initialState);
 
-  // fetch player data
-  React.useEffect1(
-    () => {
-      dispatch(FetchDataPending);
-
-      Js.Promise.(
-        fetchWithAuth("https://api.spotify.com/v1/me/player", authHeader)
-        |> then_(Fetch.Response.json)
-        |> then_(json => json |> Decode.response |> resolve)
-        |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
-      )
-      |> ignore;
-      Some(() => ());
-    },
-    [|state.playing|],
-  );
-
   // play song
   React.useEffect1(
     () => {
@@ -131,6 +129,23 @@ let make = (~children) => {
         )
         |> ignore;
       };
+      Some(() => ());
+    },
+    [|state.currentSong|],
+  );
+
+  // fetch player data
+  React.useEffect1(
+    () => {
+      dispatch(FetchDataPending);
+
+      Js.Promise.(
+        fetchWithAuth("https://api.spotify.com/v1/me/player", authHeader)
+        |> then_(Fetch.Response.json)
+        |> then_(json => json |> Decode.response |> resolve)
+        |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
+      )
+      |> ignore;
       Some(() => ());
     },
     [|state.currentSong|],

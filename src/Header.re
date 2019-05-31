@@ -8,22 +8,21 @@ module Styles = {
       display(`flex),
       justifyContent(`spaceBetween),
       boxSizing(`borderBox),
+      position(`relative),
+      boxShadow(~x=px(0), ~y=px(2), ~blur=px(4), rgba(12, 38, 69, 0.15)),
     ]);
 
-    let controls =
+  let controls =
     style([
       backgroundColor(hex("B03D32")),
       display(`flex),
       justifyContent(`flexEnd),
       boxSizing(`borderBox),
+      boxShadow(~x=px(0), ~y=px(2), ~blur=px(4), rgba(12, 38, 69, 0.3)),
     ]);
 
   let container =
-    style([
-      position(`fixed),
-      width(`percent(100.0)),
-      zIndex(10),
-    ]);
+    style([position(`fixed), width(`percent(100.0)), zIndex(10)]);
 
   let title =
     style([

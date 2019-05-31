@@ -22,6 +22,7 @@ module Styles = {
       fontFamily("IBM Plex Sans"),
       margin(px(0)),
       backgroundColor(hex("F6F4F4")),
+      color(hex("24292e"))
     ],
   );
 };

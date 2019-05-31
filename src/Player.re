@@ -7,13 +7,28 @@ module Styles = {
     style([
       padding(px(10)),
       display(`flex),
+      color(hex("fff")),
+      alignItems(`center),
     ]);
+
+  let nowPlaying =
+    style([
+      margin2(~v=px(0), ~h=px(20)),
+      fontSize(px(18)),
+      letterSpacing(px(1)),
+    ]);
+
+  let song = style([fontWeight(`num(700))]);
 };
 
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(settingsContext);
-  let text = "now playing" ++ state.data.name;
+  let artist =
+    switch (state.data.artists) {
+    | [] => ""
+    | [a, ..._] => a.name
+    };
 
   <div className=Styles.container>
     <button onClick={_event => dispatch(TogglePlay)}>
@@ -25,7 +40,12 @@ let make = () => {
     <button onClick={_event => dispatch(TogglePlay)}>
       {ReasonReact.string("next")}
     </button>
-    <div> {state.loading ? ReasonReact.string("...loading") : <div />} </div>
-    <h3> {ReasonReact.string(text)} </h3>
+    <div className=Styles.nowPlaying>
+      <span> {ReasonReact.string(artist ++ " - ")} </span>
+      <span className=Styles.song>
+        {ReasonReact.string(state.data.name)}
+      </span>
+      <span> {state.data.progress_ms |> string_of_int |> ReasonReact.string} </span>
+    </div>
   </div>;
 };

@@ -1,4 +1,3 @@
-open Utils;
 open SettingsProvider;
 
 module Styles = {
