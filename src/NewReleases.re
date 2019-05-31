@@ -9,11 +9,16 @@ module Styles = {
     style([
       display(`grid),
       gridAutoRows(px(300)),
-      gridTemplateColumns([px(300), px(300), px(300)]),
-      gridGap(px(30)),
+      gridTemplateColumns([
+        `percent(25.0),
+        `percent(25.0),
+        `percent(25.0),
+        `percent(25.0),
+      ]),
+      //gridTemplateColumns(repeat(12, minmax(px(100), fr(1)))),
+      //grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gridGap(px(3)),
     ]);
-
-  global("body", [fontFamily("IBM Plex Sans")]);
 };
 
 [@react.component]
@@ -24,7 +29,10 @@ let make = () => {
     <h1 className=Styles.title> {ReasonReact.string("new releases")} </h1>
     <div className=Styles.container>
       {List.length(state.albumData) > 0
-         ? List.map(album => <Album album authHeader deviceId />, state.albumData)
+         ? List.map(
+             album => <Album album />,
+             state.albumData,
+           )
            |> Array.of_list
            |> ReasonReact.array
          : ReasonReact.string("No data available.")}

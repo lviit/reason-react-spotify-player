@@ -7,6 +7,25 @@ type action =
   | PlayerLoading
   | PlayerReady(string);
 
+
+module Styles = {
+  open Css;
+
+  let main =
+    style([
+      padding3(~top=px(80), ~h=px(20), ~bottom=px(20))
+    ]);
+
+  global(
+    "body",
+    [
+      fontFamily("IBM Plex Sans"),
+      margin(px(0)),
+      backgroundColor(hex("F6F4F4")),
+    ],
+  );
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -57,9 +76,8 @@ let make = () => {
     [||],
   );
 
-    <SettingsProvider>
-      <Player />
-      <LoginButton />
-      <NewReleases />
-    </SettingsProvider>;
+  <SettingsProvider>
+    <Header />
+    <div className=Styles.main> <Player /> <NewReleases /> </div>
+  </SettingsProvider>;
 };

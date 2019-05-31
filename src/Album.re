@@ -7,9 +7,14 @@ module Styles = {
 
   let container = (image: AlbumData.image) =>
     style([
-      backgroundImage(`url(image.url)),
-      backgroundColor(colorBg |> hex),
+      backgrounds([
+        radialGradient(
+          [(50, rgba(0, 0, 0, 0.0)), (100, rgba(0, 0, 0, 0.3))],
+        ),
+        `url(image.url)
+      ]),
       backgroundSize(`cover),
+      backgroundColor(colorBg |> hex),
       color(colorFontLight |> hex),
       position(`relative),
       display(`flex),
@@ -23,7 +28,6 @@ module Styles = {
       marginTop(0 |> px),
       marginBottom(10 |> px),
       fontSize(24 |> px),
-      //textTransform(`uppercase),
     ]);
 
   let info =
@@ -42,8 +46,6 @@ module Styles = {
 let make =
     (
       ~album as {name, id, images, artists, uri}: AlbumData.album,
-      ~authHeader,
-      ~deviceId,
     ) => {
   let (_, dispatch) = React.useContext(settingsContext);
   let image = List.hd(images);

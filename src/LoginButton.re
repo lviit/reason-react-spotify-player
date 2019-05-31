@@ -5,17 +5,17 @@ module Styles = {
 
   let button =
     style([
-      padding2(px(20), px(20)),
-      fontSize(24 |> px),
-      backgroundColor(hex("aaa")),
+      padding2(px(5), px(20)),
+      fontSize(18 |> px),
+      border(px(2), `solid, hex("fff")),
+      letterSpacing(px(1)),
       color(white),
       textDecoration(none),
-      margin2(px(20), px(0)),
-      width(px(200)),
       textAlign(center),
       display(block),
-      fontWeight(`num(700)),
-      //textTransform(`uppercase),
+      fontWeight(`num(500)),
+      hover([backgroundColor(hex("fff")), color(hex("DB4D3F"))]),
+      //backgroundColor(hex("DB4D3F")),
     ]);
 };
 
