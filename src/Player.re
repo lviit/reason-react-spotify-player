@@ -1,5 +1,4 @@
 open SettingsProvider;
-
 module Styles = {
   open Css;
 
@@ -31,15 +30,9 @@ let make = () => {
     };
 
   <div className=Styles.container>
-    <button onClick={_event => dispatch(TogglePlay)}>
-      {ReasonReact.string("previous")}
-    </button>
-    <button onClick={_event => dispatch(TogglePlay)}>
-      {ReasonReact.string(state.playing ? "pause" : "play")}
-    </button>
-    <button onClick={_event => dispatch(TogglePlay)}>
-      {ReasonReact.string("next")}
-    </button>
+    <Button icon=Button.Prev action={_ => dispatch(TogglePlay)} />
+    <Button icon={state.playing ? Button.Pause : Button.Play} action={_ => dispatch(TogglePlay)} />
+    <Button icon=Button.Next action={_ => dispatch(TogglePlay)} />
     <div className=Styles.nowPlaying>
       <span> {ReasonReact.string(artist ++ " - ")} </span>
       <span className=Styles.song>

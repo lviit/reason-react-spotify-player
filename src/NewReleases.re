@@ -5,8 +5,9 @@ module Styles = {
 
   let title =
     style([
-      fontSize(px(80)),
-      fontWeight(`num(500)),
+      fontSize(px(60)),
+      margin(px(100)),
+      fontWeight(`num(700)),
       letterSpacing(px(1)),
       textAlign(`center)
     ]);
