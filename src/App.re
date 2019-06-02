@@ -77,8 +77,8 @@ let make = () => {
     [||],
   );
 
-  <SettingsProvider>
+  <StoreProvider>
     <Header />
     <div className=Styles.main>  <NewReleases /> </div>
-  </SettingsProvider>;
+  </StoreProvider>;
 };

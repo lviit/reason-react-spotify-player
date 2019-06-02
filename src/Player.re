@@ -1,4 +1,5 @@
-open SettingsProvider;
+open StoreProvider;
+
 module Styles = {
   open Css;
 
@@ -22,7 +23,7 @@ module Styles = {
 
 [@react.component]
 let make = () => {
-  let (state, dispatch) = React.useContext(settingsContext);
+  let (state, dispatch) = React.useContext(storeContext);
   let artist =
     switch (state.data.artists) {
     | [] => ""
@@ -31,14 +32,17 @@ let make = () => {
 
   <div className=Styles.container>
     <Button icon=Button.Prev action={_ => dispatch(TogglePlay)} />
-    <Button icon={state.playing ? Button.Pause : Button.Play} action={_ => dispatch(TogglePlay)} />
+    <Button
+      icon={state.playing ? Button.Pause : Button.Play}
+      action={_ => dispatch(TogglePlay)}
+    />
     <Button icon=Button.Next action={_ => dispatch(TogglePlay)} />
     <div className=Styles.nowPlaying>
       <span> {ReasonReact.string(artist ++ " - ")} </span>
       <span className=Styles.song>
         {ReasonReact.string(state.data.name)}
       </span>
-      <span> {state.data.progress_ms |> string_of_int |> ReasonReact.string} </span>
+      <Progress />
     </div>
   </div>;
 };

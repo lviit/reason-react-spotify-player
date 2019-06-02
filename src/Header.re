@@ -3,9 +3,10 @@ module Styles = {
 
   let titleBar =
     style([
-      padding(px(10)),
+      padding(px(5)),
       backgroundColor(hex("DB4D3F")),
       display(`flex),
+      alignItems(`center),
       justifyContent(`spaceBetween),
       boxSizing(`borderBox),
       position(`relative),
@@ -26,11 +27,13 @@ module Styles = {
 
   let title =
     style([
-      fontSize(25 |> px),
+      fontSize(20 |> px),
       textTransform(`uppercase),
       color(white),
       margin(px(0)),
+      marginLeft(px(5)),
       fontWeight(`num(700)),
+      letterSpacing(px(2))
       //textTransform(`uppercase),
     ]);
 };

@@ -8,27 +8,28 @@ type settings = {
   deviceId: string,
 };
 
-type artist = {
-  name: string
-}
+type artist = {name: string};
 
 type item = {
   id: string,
   name: string,
-  progress_ms: int,
-  artists: list(artist)
+  artists: list(artist),
 };
 
 type state = {
   data: item,
   loading: bool,
   playing: bool,
+  progress: int,
   currentSong: string,
   albumDataLoading: bool,
   albumData: list(AlbumData.album),
 };
 
-type response = {item};
+type response = {
+  item,
+  progress_ms: int,
+};
 
 let url = Url.URLSearchParams.make(hash);
 let accessToken = Url.URLSearchParams.get("#access_token", url);
@@ -54,20 +55,20 @@ type action =
   | FetchAlbumDataFulfilled(AlbumData.response);
 
 module Decode = {
-  let artist = json =>
-    Json.Decode.{
-      name: json |> field("name", string),
-    };
+  let artist = json => Json.Decode.{name: json |> field("name", string)};
 
   let item = json =>
     Json.Decode.{
       id: json |> field("id", string),
       name: json |> field("name", string),
-      progress_ms: json |> field("progress_ms", int),
-      artists: json |> field("artists", list(artist))
+      artists: json |> field("artists", list(artist)),
     };
 
-  let response = json => Json.Decode.{item: json |> field("item", item)};
+  let response = json =>
+    Json.Decode.{
+      item: json |> field("item", item),
+      progress_ms: json |> field("progress_ms", int),
+    };
 };
 
 let reducer = (state, action) =>
@@ -75,7 +76,12 @@ let reducer = (state, action) =>
   | Play(uri) => {...state, currentSong: uri}
   | TogglePlay => {...state, playing: !state.playing}
   | FetchDataPending => {...state, loading: true}
-  | FetchDataFulfilled(data) => {...state, loading: false, data: data.item}
+  | FetchDataFulfilled(data) => {
+      ...state,
+      loading: false,
+      data: data.item,
+      progress: data.progress_ms,
+    }
   | FetchAlbumDataPending => {...state, albumDataLoading: true}
   | FetchAlbumDataFulfilled(data) => {
       ...state,
@@ -90,22 +96,22 @@ let initialState = {
   data: {
     id: "",
     name: "",
-    progress_ms: 0,
     artists: [],
   },
+  progress: 0,
   albumDataLoading: false,
   albumData: [],
   currentSong: "",
 };
 
-let settingsContext = React.createContext((initialState, action => ()));
+let storeContext = React.createContext((initialState, action => ()));
 module Provider = {
   let makeProps = (~value, ~children, ()) => {
     "value": value,
     "children": children,
   };
 
-  let make = React.Context.provider(settingsContext);
+  let make = React.Context.provider(storeContext);
 };
 
 [@react.component]
@@ -117,7 +123,11 @@ let make = (~children) => {
     () => {
       if (state.currentSong !== "") {
         let payload = Js.Dict.empty();
-        Js.Dict.set(payload, "context_uri", Js.Json.string(state.currentSong));
+        Js.Dict.set(
+          payload,
+          "context_uri",
+          Js.Json.string(state.currentSong),
+        );
 
         Js.Promise.(
           putWithAuth(

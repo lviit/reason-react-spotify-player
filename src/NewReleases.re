@@ -1,4 +1,4 @@
-open SettingsProvider;
+open StoreProvider;
 
 module Styles = {
   open Css;
@@ -30,7 +30,7 @@ module Styles = {
 
 [@react.component]
 let make = () => {
-  let (state, _) = React.useContext(settingsContext);
+  let (state, _) = React.useContext(storeContext);
 
   <div>
     <h1 className=Styles.title> {ReasonReact.string("New releases")} </h1>

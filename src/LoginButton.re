@@ -5,7 +5,7 @@ module Styles = {
 
   let button =
     style([
-      padding2(px(0), px(20)),
+      padding2(px(5), px(20)),
       fontSize(16 |> px),
       backgroundColor(hex("B03D32")),
       letterSpacing(px(1)),

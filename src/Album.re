@@ -1,4 +1,4 @@
-open SettingsProvider;
+open StoreProvider;
 
 module Styles = {
   open Css;
@@ -46,7 +46,7 @@ let make =
     (
       ~album as {name, id, images, artists, uri}: AlbumData.album,
     ) => {
-  let (_, dispatch) = React.useContext(settingsContext);
+  let (_, dispatch) = React.useContext(storeContext);
   let image = List.hd(images);
   let artist = List.hd(artists);
 
