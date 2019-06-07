@@ -1,12 +1,4 @@
-open Webapi;
-open Utils;
-
-[@bs.val] [@bs.scope ("window", "location")] external hash: string = "hash";
-
-type settings = {
-  authHeader: string,
-  deviceId: string,
-};
+open Request;
 
 type artist = {name: string};
 
@@ -30,20 +22,6 @@ type response = {
   item,
   progress_ms: int,
 };
-
-let url = Url.URLSearchParams.make(hash);
-let accessToken = Url.URLSearchParams.get("#access_token", url);
-let authHeader =
-  switch (accessToken) {
-  | None => "none"
-  | Some(accessToken) => "Bearer " ++ accessToken
-  };
-
-let deviceId =
-  switch (Url.URLSearchParams.get("device_id", url)) {
-  | None => "none"
-  | Some(deviceId) => deviceId
-  };
 
 /* Action declaration */
 type action =
@@ -119,30 +97,26 @@ let make = (~children) => {
   let (state, dispatch) = React.useReducer(reducer, initialState);
 
   // play song
-  React.useEffect1(
-    () => {
-      if (state.currentSong !== "") {
-        let payload = Js.Dict.empty();
-        Js.Dict.set(
-          payload,
-          "context_uri",
-          Js.Json.string(state.currentSong),
-        );
+   React.useEffect1(
+     () => {
+       if (state.currentSong !== "") {
+         let payload = Js.Dict.empty();
+         Js.Dict.set(
+           payload,
+           "context_uri",
+           Js.Json.string(state.currentSong),
+         );
 
-        Js.Promise.(
-          putWithAuth(
-            "https://api.spotify.com/v1/me/player/play?device_id=" ++ deviceId,
-            authHeader,
-            payload,
-          )
-          |> then_(resolve)
-        )
-        |> ignore;
-      };
-      Some(() => ());
-    },
-    [|state.currentSong|],
-  );
+         Js.Promise.(
+           playSong(payload)
+           |> then_(resolve)
+         )
+         |> ignore;
+       };
+       Some(() => ());
+     },
+     [|state.currentSong|],
+   );
 
   // fetch player data
   React.useEffect1(
@@ -150,11 +124,11 @@ let make = (~children) => {
       dispatch(FetchDataPending);
 
       Js.Promise.(
-        fetchWithAuth("https://api.spotify.com/v1/me/player", authHeader)
-        |> then_(Fetch.Response.json)
-        |> then_(json => json |> Decode.response |> resolve)
-        |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
-      )
+        request(Player)
+          |> then_(Fetch.Response.json)
+          |> then_(json => json |> Decode.response |> resolve)
+          |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
+        )
       |> ignore;
       Some(() => ());
     },
@@ -163,20 +137,9 @@ let make = (~children) => {
 
   // toggle play/pause
   React.useEffect1(
-    () => {
-      Js.log("play toggle effect firing");
-      let url =
-        "https://api.spotify.com/v1/me/player/"
-        ++ (state.playing ? "pause" : "play");
+    () => {      
       Js.Promise.(
-        Fetch.fetchWithInit(
-          url,
-          Fetch.RequestInit.make(
-            ~headers=Fetch.HeadersInit.make({"Authorization": authHeader}),
-            ~method_=Put,
-            (),
-          ),
-        )
+        request(state.playing? Pause : Play)
         |> then_(resolve)
       )
       |> ignore;
@@ -184,16 +147,14 @@ let make = (~children) => {
     },
     [|state.playing|],
   );
+
   // fetch album data
   React.useEffect1(
     () => {
       dispatch(FetchAlbumDataPending);
 
       Js.Promise.(
-        fetchWithAuth(
-          "https://api.spotify.com/v1/browse/new-releases",
-          authHeader,
-        )
+        request(NewReleases)
         |> then_(Fetch.Response.json)
         |> then_(json => json |> AlbumData.Decode.response |> resolve)
         |> then_(data => FetchAlbumDataFulfilled(data) |> dispatch |> resolve)

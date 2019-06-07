@@ -1,7 +1,11 @@
 module Styles = {
   open Css;
 
-  let progress = style([padding(px(10)), fontSize(px(24))]);
+  let progress =
+    style([
+      fontSize(px(18)),
+      letterSpacing(px(1)),
+    ]);
 };
 
 type action =
@@ -22,7 +26,7 @@ let make = () => {
 
   React.useEffect1(
     () => {
-      Js.Global.setInterval(() => dispatch(Increment), 1000) |>  ignore;
+      Js.Global.setInterval(() => dispatch(Increment), 1000) |> ignore;
       Some(() => ());
     },
     [||],
@@ -37,6 +41,6 @@ let make = () => {
     };
 
   <span className=Styles.progress>
-    {ReasonReact.string(minutes ++ ":" ++ seconds(state.progress))}
+    {ReasonReact.string(" - " ++ minutes ++ ":" ++ seconds(state.progress))}
   </span>;
 };

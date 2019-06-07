@@ -41,7 +41,6 @@ let make = () => {
 
   React.useEffect1(
     () => {
-      Js.log("effect!");
       dispatch(PlayerLoading);
       //initSpotifyPlayer();
 
@@ -68,7 +67,7 @@ let make = () => {
           player.addListener('not_ready', ({ device_id }) => {
             console.log('Device ID has gone offline', device_id);
           });
-          player.connect().then(success => player.togglePlay());
+          player.connect();
         }
        |};
 

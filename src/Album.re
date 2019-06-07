@@ -52,7 +52,6 @@ let make =
 
   <div
     className={Styles.container(image)}
-    key=id
     onClick={_event => dispatch(Play(uri))}>
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>

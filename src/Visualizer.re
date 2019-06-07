@@ -8,8 +8,6 @@ module Styles = {
 let make = () => {
   React.useEffect1(
     () => {
-      Js.log("effect!");
-
       // TODO: handle with proper bindings
       %bs.raw
       {|
