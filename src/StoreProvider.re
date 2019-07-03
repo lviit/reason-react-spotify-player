@@ -57,8 +57,8 @@ module Decode = {
 
 let reducer = (state, action) =>
   switch (action) {
-  | Play => {...state, playing: false}
-  | Pause => {...state, playing: true}
+  | Play => {...state, playing: true}
+  | Pause => {...state, playing: false}
   | FetchDataPending => {...state, loading: true}
   | FetchDataFulfilled(data) => {
       ...state,
@@ -98,6 +98,7 @@ let rec handleAsync = (dispatch, action) => {
            setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
            |> resolve
          )
+      |> then_(_ => dispatch(Play) |> resolve)
     )  // wtf why the timeout
     |> ignore
   | Prev =>
@@ -127,8 +128,12 @@ let rec handleAsync = (dispatch, action) => {
       |> resolve
     )
     |> ignore
-  | Play => Js.Promise.(request(Play) |> then_(resolve)) |> ignore
-  | Pause => Js.Promise.(request(Pause) |> then_(resolve)) |> ignore
+  | Play =>
+    Js.Promise.(request(Play) |> then_(_ => dispatch(Play) |> resolve))
+    |> ignore
+  | Pause =>
+    Js.Promise.(request(Pause) |> then_(_ => dispatch(Pause) |> resolve))
+    |> ignore
   | FetchAlbumDataPending =>
     Js.Promise.(
       request(NewReleases)
