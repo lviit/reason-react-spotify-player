@@ -9,7 +9,7 @@ module Styles = {
       margin(px(100)),
       fontWeight(`num(700)),
       letterSpacing(px(1)),
-      textAlign(`center)
+      textAlign(`center),
     ]);
 
   let container =
@@ -30,7 +30,15 @@ module Styles = {
 
 [@react.component]
 let make = () => {
-  let (state, _) = React.useContext(storeContext);
+  let (state, dispatch) = React.useContext(storeContext);
+
+  React.useEffect1(
+    () => {
+      dispatch(FetchAlbumDataPending);
+      Some(() => ());
+    },
+    [||],
+  );
 
   <div>
     <h1 className=Styles.title> {ReasonReact.string("New releases")} </h1>

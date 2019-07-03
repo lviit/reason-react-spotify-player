@@ -1,4 +1,5 @@
 open StoreProvider;
+open Request;
 
 module Styles = {
   open Css;
@@ -13,11 +14,7 @@ module Styles = {
       justifyContent(`spaceBetween),
     ]);
 
-  let nowPlaying =
-    style([
-      fontSize(px(18)),
-      letterSpacing(px(1)),
-    ]);
+  let nowPlaying = style([fontSize(px(18)), letterSpacing(px(1))]);
 
   let controls = style([display(`flex), alignItems(`center)]);
 
@@ -27,6 +24,7 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
+
   let artist =
     switch (state.data.artists) {
     | [] => ""
@@ -42,12 +40,12 @@ let make = () => {
       <Progress />
     </div>
     <div className=Styles.controls>
-      <Button icon=Button.Prev action={_ => dispatch(TogglePlay)} />
+      <Button icon=Button.Prev action={_ => dispatch(Prev)} />
       <Button
         icon={state.playing ? Button.Pause : Button.Play}
-        action={_ => dispatch(TogglePlay)}
+        action={_ => dispatch(state.playing ? Pause : Play)}
       />
-      <Button icon=Button.Next action={_ => dispatch(TogglePlay)} />
+      <Button icon=Button.Next action={_ => dispatch(Next)} />
     </div>
   </div>;
 };

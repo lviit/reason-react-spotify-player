@@ -42,25 +42,27 @@ let requestBase = (endpoint: string, method: Fetch.requestMethod) =>
     ),
   );
 
-let playSong = (payload) =>
+let playSong = uri => {
+  let payload = Js.Dict.empty();
+  Js.Dict.set(payload, "context_uri", Js.Json.string(uri));
   Fetch.fetchWithInit(
     baseUrl ++ "/me/player/play?device_id=" ++ QueryString.deviceId,
     Fetch.RequestInit.make(
       ~headers=
         Fetch.HeadersInit.make({"Authorization": QueryString.authHeader}),
       ~method_=Put,
-      ~body=payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
+      ~body=
+        payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
       (),
     ),
   );
-
+}
 let request = request =>
   switch (request) {
   | NewReleases => requestBase("/browse/new-releases", Get)
   | Player => requestBase("/me/player", Get)
   | Play => requestBase("/me/player", Put)
   | Pause => requestBase("/me/player/pause", Put)
-  | Next => requestBase("/me/player/next", Get)
-  | Previous => requestBase("/me/player/previous", Get)
+  | Next => requestBase("/me/player/next", Post)
+  | Previous => requestBase("/me/player/previous", Post)
   };
-  

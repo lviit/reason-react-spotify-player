@@ -1,5 +1,7 @@
 open Request;
 
+[@bs.val] external setTimeout: (unit => unit, int) => float = "setTimeout";
+
 type artist = {name: string};
 
 type item = {
@@ -25,8 +27,12 @@ type response = {
 
 /* Action declaration */
 type action =
-  | TogglePlay
-  | Play(string)
+  | Prev
+  | Next
+  | PlaySong(string)
+  | Play
+  | Pause
+  | FetchPlayer
   | FetchDataPending
   | FetchDataFulfilled(response)
   | FetchAlbumDataPending
@@ -51,8 +57,8 @@ module Decode = {
 
 let reducer = (state, action) =>
   switch (action) {
-  | Play(uri) => {...state, currentSong: uri}
-  | TogglePlay => {...state, playing: !state.playing}
+  | Play => {...state, playing: false}
+  | Pause => {...state, playing: true}
   | FetchDataPending => {...state, loading: true}
   | FetchDataFulfilled(data) => {
       ...state,
@@ -66,6 +72,7 @@ let reducer = (state, action) =>
       albumDataLoading: false,
       albumData: data.albums.items,
     }
+  | _ => state
   };
 
 let initialState = {
@@ -82,7 +89,59 @@ let initialState = {
   currentSong: "",
 };
 
-let storeContext = React.createContext((initialState, action => ()));
+let rec handleAsync = (dispatch, action) => {
+  switch (action) {
+  | PlaySong(uri) =>
+    Js.Promise.(
+      playSong(uri)
+      |> then_(_ =>
+           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           |> resolve
+         )
+    )  // wtf why the timeout
+    |> ignore
+  | Prev =>
+    Js.Promise.(
+      request(Previous)
+      |> then_(_ =>
+           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           |> resolve
+         )
+    )  // wtf why the timeout
+    |> ignore
+  | Next =>
+    Js.Promise.(
+      request(Next)
+      |> then_(_ =>
+           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           |> resolve
+         )
+    )  // wtf why the timeout
+    |> ignore
+  | FetchPlayer =>
+    Js.Promise.(
+      request(Player)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json |> Decode.response |> resolve)
+      |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
+      |> resolve
+    )
+    |> ignore
+  | Play => Js.Promise.(request(Play) |> then_(resolve)) |> ignore
+  | Pause => Js.Promise.(request(Pause) |> then_(resolve)) |> ignore
+  | FetchAlbumDataPending =>
+    Js.Promise.(
+      request(NewReleases)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json |> AlbumData.Decode.response |> resolve)
+      |> then_(data => FetchAlbumDataFulfilled(data) |> dispatch |> resolve)
+    )
+    |> ignore
+  | _ => action |> dispatch
+  };
+};
+
+let storeContext = React.createContext((initialState, _ => ()));
 module Provider = {
   let makeProps = (~value, ~children, ()) => {
     "value": value,
@@ -96,74 +155,5 @@ module Provider = {
 let make = (~children) => {
   let (state, dispatch) = React.useReducer(reducer, initialState);
 
-  // play song
-   React.useEffect1(
-     () => {
-       if (state.currentSong !== "") {
-         let payload = Js.Dict.empty();
-         Js.Dict.set(
-           payload,
-           "context_uri",
-           Js.Json.string(state.currentSong),
-         );
-
-         Js.Promise.(
-           playSong(payload)
-           |> then_(resolve)
-         )
-         |> ignore;
-       };
-       Some(() => ());
-     },
-     [|state.currentSong|],
-   );
-
-  // fetch player data
-  React.useEffect1(
-    () => {
-      dispatch(FetchDataPending);
-
-      Js.Promise.(
-        request(Player)
-          |> then_(Fetch.Response.json)
-          |> then_(json => json |> Decode.response |> resolve)
-          |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
-        )
-      |> ignore;
-      Some(() => ());
-    },
-    [|state.currentSong|],
-  );
-
-  // toggle play/pause
-  React.useEffect1(
-    () => {      
-      Js.Promise.(
-        request(state.playing? Pause : Play)
-        |> then_(resolve)
-      )
-      |> ignore;
-      Some(() => ());
-    },
-    [|state.playing|],
-  );
-
-  // fetch album data
-  React.useEffect1(
-    () => {
-      dispatch(FetchAlbumDataPending);
-
-      Js.Promise.(
-        request(NewReleases)
-        |> then_(Fetch.Response.json)
-        |> then_(json => json |> AlbumData.Decode.response |> resolve)
-        |> then_(data => FetchAlbumDataFulfilled(data) |> dispatch |> resolve)
-      )
-      |> ignore;
-      Some(() => ());
-    },
-    [||],
-  );
-
-  <Provider value=(state, dispatch)> children </Provider>;
+  <Provider value=(state, handleAsync(dispatch))> children </Provider>;
 };
