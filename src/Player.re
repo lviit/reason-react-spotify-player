@@ -1,5 +1,4 @@
 open StoreProvider;
-open Request;
 
 module Styles = {
   open Css;

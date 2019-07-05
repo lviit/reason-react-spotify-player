@@ -61,7 +61,7 @@ let request = request =>
   switch (request) {
   | NewReleases => requestBase("/browse/new-releases", Get)
   | Player => requestBase("/me/player", Get)
-  | Play => requestBase("/me/player", Put)
+  | Play => requestBase("/me/player/play", Put)
   | Pause => requestBase("/me/player/pause", Put)
   | Next => requestBase("/me/player/next", Post)
   | Previous => requestBase("/me/player/previous", Post)

@@ -15,7 +15,7 @@ type state = {
   loading: bool,
   playing: bool,
   progress: int,
-  currentSong: string,
+  progressTimer: Js.Global.intervalId,
   albumDataLoading: bool,
   albumData: list(AlbumData.album),
 };
@@ -25,7 +25,15 @@ type response = {
   progress_ms: int,
 };
 
-/* Action declaration */
+type reducer =
+  | Play(Js.Global.intervalId)
+  | Pause
+  | FetchDataPending
+  | FetchDataFulfilled(response)
+  | FetchAlbumDataPending
+  | FetchAlbumDataFulfilled(AlbumData.response)
+  | IncrementProgress;
+
 type action =
   | Prev
   | Next
@@ -33,10 +41,7 @@ type action =
   | Play
   | Pause
   | FetchPlayer
-  | FetchDataPending
-  | FetchDataFulfilled(response)
-  | FetchAlbumDataPending
-  | FetchAlbumDataFulfilled(AlbumData.response);
+  | FetchAlbumDataPending;
 
 module Decode = {
   let artist = json => Json.Decode.{name: json |> field("name", string)};
@@ -55,16 +60,17 @@ module Decode = {
     };
 };
 
-let reducer = (state, action) =>
-  switch (action) {
-  | Play => {...state, playing: true}
+let reducer = (state, reducer: reducer) =>
+  switch (reducer) {
+  | Play(timerId) => {...state, playing: true, progressTimer: timerId}
   | Pause => {...state, playing: false}
+  | IncrementProgress => {...state, progress: state.progress + 1}
   | FetchDataPending => {...state, loading: true}
   | FetchDataFulfilled(data) => {
       ...state,
       loading: false,
       data: data.item,
-      progress: data.progress_ms,
+      progress: data.progress_ms / 1000,
     }
   | FetchAlbumDataPending => {...state, albumDataLoading: true}
   | FetchAlbumDataFulfilled(data) => {
@@ -84,28 +90,31 @@ let initialState = {
     artists: [],
   },
   progress: 0,
+  progressTimer: Js.Global.setInterval(() => (), 1000000), // fix so we can default to unit
   albumDataLoading: false,
   albumData: [],
-  currentSong: "",
 };
 
-let rec handleAsync = (dispatch, action) => {
+let rec handleAsync = (dispatch, state, action: action) => {
   switch (action) {
   | PlaySong(uri) =>
+    Js.Global.clearInterval(state.progressTimer);
+    let timerId =
+      Js.Global.setInterval(() => dispatch(IncrementProgress), 1000);
     Js.Promise.(
       playSong(uri)
       |> then_(_ =>
-           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           setTimeout(_ => handleAsync(dispatch, state, FetchPlayer), 300)
            |> resolve
          )
-      |> then_(_ => dispatch(Play) |> resolve)
+      |> then_(_ => dispatch(Play(timerId)) |> resolve)
     )  // wtf why the timeout
-    |> ignore
+    |> ignore;
   | Prev =>
     Js.Promise.(
       request(Previous)
       |> then_(_ =>
-           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           setTimeout(_ => handleAsync(dispatch, state, FetchPlayer), 300)
            |> resolve
          )
     )  // wtf why the timeout
@@ -114,7 +123,7 @@ let rec handleAsync = (dispatch, action) => {
     Js.Promise.(
       request(Next)
       |> then_(_ =>
-           setTimeout(_ => handleAsync(dispatch, FetchPlayer), 300)
+           setTimeout(_ => handleAsync(dispatch,state,  FetchPlayer), 300)
            |> resolve
          )
     )  // wtf why the timeout
@@ -129,9 +138,15 @@ let rec handleAsync = (dispatch, action) => {
     )
     |> ignore
   | Play =>
-    Js.Promise.(request(Play) |> then_(_ => dispatch(Play) |> resolve))
-    |> ignore
+    Js.Global.clearInterval(state.progressTimer);
+    let timerId =
+      Js.Global.setInterval(() => dispatch(IncrementProgress), 1000);
+    Js.Promise.(
+      request(Play) |> then_(_ => dispatch(Play(timerId)) |> resolve)
+    )
+    |> ignore;
   | Pause =>
+    Js.Global.clearInterval(state.progressTimer);
     Js.Promise.(request(Pause) |> then_(_ => dispatch(Pause) |> resolve))
     |> ignore
   | FetchAlbumDataPending =>
@@ -142,7 +157,7 @@ let rec handleAsync = (dispatch, action) => {
       |> then_(data => FetchAlbumDataFulfilled(data) |> dispatch |> resolve)
     )
     |> ignore
-  | _ => action |> dispatch
+  | _ => ()
   };
 };
 
@@ -160,5 +175,5 @@ module Provider = {
 let make = (~children) => {
   let (state, dispatch) = React.useReducer(reducer, initialState);
 
-  <Provider value=(state, handleAsync(dispatch))> children </Provider>;
+  <Provider value=(state, handleAsync(dispatch, state))> children </Provider>;
 };
