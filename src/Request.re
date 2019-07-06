@@ -1,22 +1,3 @@
-open Webapi;
-
-module QueryString = {
-  open Url.URLSearchParams;
-
-  [@bs.val] [@bs.scope ("window", "location")] external hash: string = "hash";
-
-  let authHeader =
-    switch (hash |> make |> get("#access_token", _)) {
-    | None => "none"
-    | Some(accessToken) => "Bearer " ++ accessToken
-    };
-
-  let deviceId =
-    switch (hash |> make |> get("device_id", _)) {
-    | None => "none"
-    | Some(deviceId) => deviceId
-    };
-};
 
 let baseUrl = "https://api.spotify.com/v1";
 
@@ -31,25 +12,25 @@ type request =
   | Next
   | Previous;
 
-let requestBase = (endpoint: string, method: Fetch.requestMethod) =>
+let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =>
   Fetch.fetchWithInit(
     baseUrl ++ endpoint,
     Fetch.RequestInit.make(
       ~headers=
-        Fetch.HeadersInit.make({"Authorization": QueryString.authHeader}),
+        Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
       ~method_=method,
       (),
     ),
   );
 
-let playSong = uri => {
+let playSong = (uri, deviceId, accessToken) => {
   let payload = Js.Dict.empty();
   Js.Dict.set(payload, "context_uri", Js.Json.string(uri));
   Fetch.fetchWithInit(
-    baseUrl ++ "/me/player/play?device_id=" ++ QueryString.deviceId,
+    baseUrl ++ "/me/player/play?device_id=" ++ deviceId,
     Fetch.RequestInit.make(
       ~headers=
-        Fetch.HeadersInit.make({"Authorization": QueryString.authHeader}),
+        Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
       ~method_=Put,
       ~body=
         payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
@@ -57,12 +38,12 @@ let playSong = uri => {
     ),
   );
 }
-let request = request =>
+let request = (request, accessToken) =>
   switch (request) {
-  | NewReleases => requestBase("/browse/new-releases", Get)
-  | Player => requestBase("/me/player", Get)
-  | Play => requestBase("/me/player/play", Put)
-  | Pause => requestBase("/me/player/pause", Put)
-  | Next => requestBase("/me/player/next", Post)
-  | Previous => requestBase("/me/player/previous", Post)
+  | NewReleases => requestBase("/browse/new-releases", Get, accessToken)
+  | Player => requestBase("/me/player", Get, accessToken)
+  | Play => requestBase("/me/player/play", Put, accessToken)
+  | Pause => requestBase("/me/player/pause", Put, accessToken)
+  | Next => requestBase("/me/player/next", Post, accessToken)
+  | Previous => requestBase("/me/player/previous", Post, accessToken)
   };
