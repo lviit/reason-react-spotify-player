@@ -33,7 +33,7 @@ module Main = {
       <Header />
       <div className=Styles.main>
         {state.player.loading
-           ? ReasonReact.string("...loading") : <NewReleases />}
+           ? <LoadingSpinner /> : <NewReleases />}
       </div>
     </React.Fragment>;
   };
