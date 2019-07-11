@@ -6,7 +6,7 @@ module Styles = {
   let title =
     style([
       fontSize(px(60)),
-      margin(px(100)),
+      margin(px(50)),
       fontWeight(`num(700)),
       letterSpacing(px(1)),
       textAlign(`center),
@@ -34,14 +34,15 @@ let make = () => {
 
   React.useEffect1(
     () => {
-      dispatch(FetchAlbumDataPending);
+      dispatch(FetchNewReleases);
       Some(() => ());
     },
     [||],
   );
 
   <div>
-    <h1 className=Styles.title> {ReasonReact.string("New releases")} </h1>
+    <h1 className=Styles.title> {ReasonReact.string("Results")} </h1>
+    {state.albumDataLoading ? <LoadingSpinner /> : ReasonReact.null}
     <div className=Styles.container>
       {List.length(state.albumData) > 0
          ? List.map(album => <Album album />, state.albumData)

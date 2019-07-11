@@ -13,8 +13,8 @@ let reducer = (state, reducer: StoreData.reducer) =>
       data: data.item,
       progress: data.progress_ms / 1000,
     }
-  | FetchAlbumDataPending => {...state, albumDataLoading: true}
-  | FetchAlbumDataFulfilled(data) => {
+  | FetchAlbumsPending => {...state, albumDataLoading: true}
+  | FetchAlbumsFulfilled(data) => {
       ...state,
       albumDataLoading: false,
       albumData: data.albums.items,

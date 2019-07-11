@@ -1,4 +1,3 @@
-
 let baseUrl = "https://api.spotify.com/v1";
 
 let reqBody = payload =>
@@ -10,7 +9,8 @@ type request =
   | Play
   | Pause
   | Next
-  | Previous;
+  | Previous
+  | Search(string);
 
 let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =>
   Fetch.fetchWithInit(
@@ -37,7 +37,8 @@ let playSong = (uri, deviceId, accessToken) => {
       (),
     ),
   );
-}
+};
+
 let request = (request, accessToken) =>
   switch (request) {
   | NewReleases => requestBase("/browse/new-releases", Get, accessToken)
@@ -46,4 +47,6 @@ let request = (request, accessToken) =>
   | Pause => requestBase("/me/player/pause", Put, accessToken)
   | Next => requestBase("/me/player/next", Post, accessToken)
   | Previous => requestBase("/me/player/previous", Post, accessToken)
+  | Search(keywords) =>
+    requestBase("/search?type=album&limit=50&q=" ++ keywords, Get, accessToken)
   };

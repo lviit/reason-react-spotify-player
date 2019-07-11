@@ -21,16 +21,6 @@ module Decode = {
     };
 };
 
-type actionType =
-  | Prev
-  | Next
-  | PlaySong(string)
-  | Play
-  | Pause
-  | FetchPlayer
-  | FetchAlbumDataPending
-  | LoadPlayer;
-
 let rec action = (dispatch, state, actionType: actionType) => {
   let {player: {deviceId, accessToken}, progressTimer} = state;
 
@@ -90,14 +80,24 @@ let rec action = (dispatch, state, actionType: actionType) => {
       request(Pause, accessToken) |> then_(_ => dispatch(Pause) |> resolve)
     )
     |> ignore;
-  | FetchAlbumDataPending =>
+  | FetchNewReleases =>
+    FetchAlbumsPending->dispatch;
     Js.Promise.(
       request(NewReleases, accessToken)
       |> then_(Fetch.Response.json)
       |> then_(json => json |> AlbumData.Decode.response |> resolve)
-      |> then_(data => FetchAlbumDataFulfilled(data) |> dispatch |> resolve)
+      |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
     )
-    |> ignore
+    |> ignore;
+  | Search(keywords) =>
+    FetchAlbumsPending->dispatch;
+    Js.Promise.(
+      request(Search(keywords), accessToken)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json |> AlbumData.Decode.response |> resolve)
+      |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
+    )
+    |> ignore;
   | LoadPlayer =>
     let hash = getLocationHash(window);
     //setLocationHash(window, "");
@@ -123,39 +123,27 @@ let rec action = (dispatch, state, actionType: actionType) => {
         let player = createSpotifyPlayer(settings);
         player
         |> addListener("initialization_error", state =>
-             state |> messageGet |> Js.log
-           )
-        |> ignore;
+             state->messageGet->Js.log
+           );
         player
         |> addListener("authentication_error", state =>
-             state |> messageGet |> Js.log
-           )
-        |> ignore;
+             state->messageGet->Js.log
+           );
         player
-        |> addListener("account_error", state =>
-             state |> messageGet |> Js.log
-           )
-        |> ignore;
+        |> addListener("account_error", state => state->messageGet->Js.log);
         player
-        |> addListener("playback_error", state =>
-             state |> messageGet |> Js.log
-           )
-        |> ignore;
-        player
-        |> addListener("player_state_changed", state => state |> Js.log)
-        |> ignore;
+        |> addListener("playback_error", state => state->messageGet->Js.log);
+        player |> addListener("player_state_changed", state => state->Js.log);
         player
         |> addListener("ready", state => {
-             state |> device_idGet |> Js.log2("Ready with Device ID");
-             PlayerReady(state |> device_idGet) |> dispatch;
-           })
-        |> ignore;
+             state->device_idGet->Js.log2("Ready with Device ID");
+             PlayerReady(state->device_idGet)->dispatch;
+           });
         // dispatch ready here
         player
         |> addListener("not_ready", state =>
              state |> device_idGet |> Js.log2("Device ID has gone offline")
-           )
-        |> ignore;
+           );
         player |> connectPlayer() |> ignore;
       },
     );

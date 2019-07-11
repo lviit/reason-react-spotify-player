@@ -33,7 +33,7 @@ module Main = {
       <Header />
       <div className=Styles.main>
         {state.player.loading
-           ? <LoadingSpinner /> : <NewReleases />}
+           ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}
       </div>
     </React.Fragment>;
   };

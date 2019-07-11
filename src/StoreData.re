@@ -33,8 +33,8 @@ type reducer =
   | Pause
   | FetchDataPending
   | FetchDataFulfilled(response)
-  | FetchAlbumDataPending
-  | FetchAlbumDataFulfilled(AlbumData.response)
+  | FetchAlbumsPending
+  | FetchAlbumsFulfilled(AlbumData.response)
   | IncrementProgress
   | PlayerLoading(string)
   | PlayerReady(string);
@@ -46,5 +46,6 @@ type actionType =
   | Play
   | Pause
   | FetchPlayer
-  | FetchAlbumDataPending
-  | LoadPlayer;
+  | FetchNewReleases
+  | LoadPlayer
+  | Search(string);
