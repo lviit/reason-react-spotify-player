@@ -19,6 +19,12 @@ let reducer = (state, reducer: StoreData.reducer) =>
       albumDataLoading: false,
       albumData: data.albums.items,
     }
+  | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
+  | FetchAlbumDetailsFulfilled(data) => {
+      ...state,
+      albumDetailsLoading: false,
+      albumDetails: data,
+    }
   | PlayerLoading(accessToken) => {
       ...state,
       player: {
@@ -54,6 +60,18 @@ let initialState = {
   progressTimer: Js.Global.setInterval(() => (), 1000000), // fix so we can default to unit
   albumDataLoading: false,
   albumData: [],
+  albumDetailsLoading: false,
+  albumDetails: {
+    name: "",
+    release_date: "",
+    id: "",
+    images: [],
+    artists: [],
+    tracks: {
+      itemss: [],
+    },
+    uri: "",
+  },
 };
 
 let storeContext = React.createContext((initialState, _ => ()));
@@ -70,7 +88,5 @@ module Provider = {
 let make = (~children) => {
   let (state, dispatch) = React.useReducer(reducer, initialState);
 
-  <Provider value=(state, action(dispatch, state))>
-    children
-  </Provider>;
+  <Provider value=(state, action(dispatch, state))> children </Provider>;
 };

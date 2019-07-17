@@ -25,12 +25,12 @@ let rec action = (dispatch, state, actionType: actionType) => {
   let {player: {deviceId, accessToken}, progressTimer} = state;
 
   switch (actionType) {
-  | PlaySong(uri) =>
+  | PlaySong(trackUri, contextUri) =>
     Js.Global.clearInterval(progressTimer);
     let timerId =
       Js.Global.setInterval(() => dispatch(IncrementProgress), 1000);
     Js.Promise.(
-      playSong(uri, deviceId, accessToken)
+      playSong(trackUri, contextUri, deviceId, accessToken)
       |> then_(_ =>
            setTimeout(_ => action(dispatch, state, FetchPlayer), 300)
            |> resolve
@@ -96,6 +96,15 @@ let rec action = (dispatch, state, actionType: actionType) => {
       |> then_(Fetch.Response.json)
       |> then_(json => json |> AlbumData.Decode.response |> resolve)
       |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
+    )
+    |> ignore;
+  | FetchAlbumDetails(id) =>
+    FetchAlbumDetailsPending->dispatch;
+    Js.Promise.(
+      request(AlbumDetails(id), accessToken)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json |> AlbumData.Decode.albumDetails |> resolve)
+      |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
     )
     |> ignore;
   | LoadPlayer =>

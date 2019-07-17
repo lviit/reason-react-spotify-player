@@ -7,10 +7,11 @@ module Styles = {
   let container = (image: AlbumData.image) =>
     style([
       backgrounds([
-        radialGradient(
-          [(50, rgba(0, 0, 0, 0.0)), (100, rgba(0, 0, 0, 0.3))],
-        ),
-        `url(image.url)
+        radialGradient([
+          (50, rgba(0, 0, 0, 0.0)),
+          (100, rgba(0, 0, 0, 0.3)),
+        ]),
+        `url(image.url),
       ]),
       backgroundSize(`cover),
       backgroundColor(colorBg |> hex),
@@ -42,17 +43,15 @@ module Styles = {
 };
 
 [@react.component]
-let make =
-    (
-      ~album as {name, id, images, artists, uri}: AlbumData.album,
-    ) => {
+let make = (~album as {name, id, images, artists, uri}: AlbumData.album) => {
   let (_, dispatch) = React.useContext(storeContext);
   let image = List.hd(images);
   let artist = List.hd(artists);
 
   <div
     className={Styles.container(image)}
-    onClick={_event => dispatch(PlaySong(uri))}>
+    // onClick={_event => dispatch(PlaySong(uri))}>
+    onClick={_ => FetchAlbumDetails(id)->dispatch}>
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>
       <span> {React.string(artist.name)} </span>

@@ -31,6 +31,7 @@ module Main = {
 
     <React.Fragment>
       <Header />
+      <AlbumDetails />
       <div className=Styles.main>
         {state.player.loading
            ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}

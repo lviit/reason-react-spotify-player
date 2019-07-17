@@ -10,7 +10,8 @@ type request =
   | Pause
   | Next
   | Previous
-  | Search(string);
+  | Search(string)
+  | AlbumDetails(string);
 
 let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =>
   Fetch.fetchWithInit(
@@ -23,9 +24,12 @@ let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =
     ),
   );
 
-let playSong = (uri, deviceId, accessToken) => {
+let playSong = (trackUri, contextUri, deviceId, accessToken) => {
+  let offset = Js.Dict.empty();
   let payload = Js.Dict.empty();
-  Js.Dict.set(payload, "context_uri", Js.Json.string(uri));
+  Js.Dict.set(offset, "uri", Js.Json.string(trackUri));
+  Js.Dict.set(payload, "offset", Js.Json.object_(offset));
+  Js.Dict.set(payload, "context_uri", Js.Json.string(contextUri));
   Fetch.fetchWithInit(
     baseUrl ++ "/me/player/play?device_id=" ++ deviceId,
     Fetch.RequestInit.make(
@@ -48,5 +52,10 @@ let request = (request, accessToken) =>
   | Next => requestBase("/me/player/next", Post, accessToken)
   | Previous => requestBase("/me/player/previous", Post, accessToken)
   | Search(keywords) =>
-    requestBase("/search?type=album&limit=50&q=" ++ keywords, Get, accessToken)
+    requestBase(
+      "/search?type=album&limit=50&q=" ++ keywords,
+      Get,
+      accessToken,
+    )
+  | AlbumDetails(id) => requestBase("/albums/" ++ id, Get, accessToken)
   };
