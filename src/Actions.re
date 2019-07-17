@@ -1,6 +1,8 @@
 open Request;
 open Spotify;
 open StoreData;
+open Js.Promise;
+open Webapi.Url;
 
 [@bs.val] external setTimeout: (unit => unit, int) => float = "setTimeout";
 
@@ -27,97 +29,63 @@ let rec action = (dispatch, state, actionType: actionType) => {
   switch (actionType) {
   | PlaySong(trackUri, contextUri) =>
     Js.Global.clearInterval(progressTimer);
-    let timerId =
-      Js.Global.setInterval(() => dispatch(IncrementProgress), 1000);
-    Js.Promise.(
-      playSong(trackUri, contextUri, deviceId, accessToken)
-      |> then_(_ =>
-           setTimeout(_ => action(dispatch, state, FetchPlayer), 300)
-           |> resolve
-         )
-      |> then_(_ => dispatch(Play(timerId)) |> resolve)
-    )  // wtf why the timeout
+    let timerId = Js.Global.setInterval(() => IncrementProgress->dispatch, 1000);
+    playSong(trackUri, contextUri, deviceId, accessToken)
+    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
+    |> then_(_ => Play(timerId)->dispatch->resolve)
+    // wtf why the timeout
     |> ignore;
   | Prev =>
-    Js.Promise.(
-      request(Previous, accessToken)
-      |> then_(_ =>
-           setTimeout(_ => action(dispatch, state, FetchPlayer), 300)
-           |> resolve
-         )
-    )  // wtf why the timeout
+    request(Previous, accessToken)
+    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
+    // wtf why the timeout
     |> ignore
   | Next =>
-    Js.Promise.(
-      request(Next, accessToken)
-      |> then_(_ =>
-           setTimeout(_ => action(dispatch, state, FetchPlayer), 300)
-           |> resolve
-         )
-    )  // wtf why the timeout
+    request(Next, accessToken)
+    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
+    // wtf why the timeout
     |> ignore
   | FetchPlayer =>
-    Js.Promise.(
-      request(Player, accessToken)
-      |> then_(Fetch.Response.json)
-      |> then_(json => json |> Decode.response |> resolve)
-      |> then_(data => FetchDataFulfilled(data) |> dispatch |> resolve)
-      |> resolve
-    )
+    request(Player, accessToken)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json->Decode.response->resolve)
+    |> then_(data => FetchDataFulfilled(data)->dispatch->resolve)
     |> ignore
   | Play =>
     Js.Global.clearInterval(progressTimer);
-    let timerId =
-      Js.Global.setInterval(() => dispatch(IncrementProgress), 1000);
-    Js.Promise.(
-      request(Play, accessToken)
-      |> then_(_ => dispatch(Play(timerId)) |> resolve)
-    )
-    |> ignore;
+    let timerId = Js.Global.setInterval(() => IncrementProgress->dispatch, 1000);
+    request(Play, accessToken) |> then_(_ => Play(timerId)->dispatch->resolve) |> ignore;
   | Pause =>
     Js.Global.clearInterval(progressTimer);
-    Js.Promise.(
-      request(Pause, accessToken) |> then_(_ => dispatch(Pause) |> resolve)
-    )
-    |> ignore;
+    request(Pause, accessToken) |> then_(_ => Pause->dispatch->resolve) |> ignore;
   | FetchNewReleases =>
     FetchAlbumsPending->dispatch;
-    Js.Promise.(
-      request(NewReleases, accessToken)
-      |> then_(Fetch.Response.json)
-      |> then_(json => json |> AlbumData.Decode.response |> resolve)
-      |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
-    )
+    request(NewReleases, accessToken)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json->AlbumData.Decode.response->resolve)
+    |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
     |> ignore;
   | Search(keywords) =>
     FetchAlbumsPending->dispatch;
-    Js.Promise.(
-      request(Search(keywords), accessToken)
-      |> then_(Fetch.Response.json)
-      |> then_(json => json |> AlbumData.Decode.response |> resolve)
-      |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
-    )
+    request(Search(keywords), accessToken)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json->AlbumData.Decode.response->resolve)
+    |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
     |> ignore;
   | FetchAlbumDetails(id) =>
     OpenAlbumDetails->dispatch;
     FetchAlbumDetailsPending->dispatch;
-    Js.Promise.(
-      request(AlbumDetails(id), accessToken)
-      |> then_(Fetch.Response.json)
-      |> then_(json => json |> AlbumData.Decode.albumDetails |> resolve)
-      |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
-    )
+    request(AlbumDetails(id), accessToken)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json->AlbumData.Decode.albumDetails->resolve)
+    |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
     |> ignore;
-  | CloseAlbumDetails => CloseAlbumDetails->dispatch;
+  | CloseAlbumDetails => CloseAlbumDetails->dispatch
   | LoadPlayer =>
     let hash = getLocationHash(window);
     //setLocationHash(window, "");
     let accessToken =
-      switch (
-        hash
-        |> Webapi.Url.URLSearchParams.make
-        |> Webapi.Url.URLSearchParams.get("#access_token", _)
-      ) {
+      switch (hash |> URLSearchParams.make |> URLSearchParams.get("#access_token", _)) {
       | None => "none"
       | Some(accessToken) => accessToken
       };
@@ -127,23 +95,12 @@ let rec action = (dispatch, state, actionType: actionType) => {
     onSpotifyWebPlaybackSDKReady(
       window,
       () => {
-        let settings =
-          settings(~name="Reason client test", ~getOAuthToken=cb =>
-            cb(accessToken)
-          );
+        let settings = settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
         let player = createSpotifyPlayer(settings);
-        player
-        |> addListener("initialization_error", state =>
-             state->messageGet->Js.log
-           );
-        player
-        |> addListener("authentication_error", state =>
-             state->messageGet->Js.log
-           );
-        player
-        |> addListener("account_error", state => state->messageGet->Js.log);
-        player
-        |> addListener("playback_error", state => state->messageGet->Js.log);
+        player |> addListener("initialization_error", state => state->messageGet->Js.log);
+        player |> addListener("authentication_error", state => state->messageGet->Js.log);
+        player |> addListener("account_error", state => state->messageGet->Js.log);
+        player |> addListener("playback_error", state => state->messageGet->Js.log);
         player |> addListener("player_state_changed", state => state->Js.log);
         player
         |> addListener("ready", state => {

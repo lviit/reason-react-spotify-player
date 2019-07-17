@@ -3,19 +3,14 @@ open StoreProvider;
 module Styles = {
   open Css;
 
-  let container =
-    style([
-      marginTop(px(40)),
-      display(`flex),
-      justifyContent(`center),
-    ]);
+  let container = style([marginTop(px(40)), display(`flex), justifyContent(`center)]);
 
   let input =
     style([
       padding2(~v=px(10), ~h=px(15)),
       fontSize(px(20)),
       backgroundColor(hex("ddd")),
-      borderStyle(`none)
+      borderStyle(`none),
     ]);
 };
 

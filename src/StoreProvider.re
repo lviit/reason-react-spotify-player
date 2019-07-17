@@ -79,10 +79,7 @@ let initialState = {
 
 let storeContext = React.createContext((initialState, _ => ()));
 module Provider = {
-  let makeProps = (~value, ~children, ()) => {
-    "value": value,
-    "children": children,
-  };
+  let makeProps = (~value, ~children, ()) => {"value": value, "children": children};
 
   let make = React.Context.provider(storeContext);
 };

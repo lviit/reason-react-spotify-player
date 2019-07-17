@@ -1,8 +1,7 @@
 module Styles = {
   open Css;
 
-  let icon =
-    style([padding2(~v=px(0), ~h=px(5)), hover([cursor(`pointer)])]);
+  let icon = style([padding2(~v=px(0), ~h=px(5)), hover([cursor(`pointer)])]);
 };
 
 type icon =

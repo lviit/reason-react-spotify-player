@@ -21,7 +21,7 @@ type albumDetails = {
   id: string,
   images: list(image),
   artists: list(artist),
-  tracks: tracks,
+  tracks,
   uri: string,
 };
 
@@ -55,8 +55,7 @@ module Decode = {
       track_number: json |> field("track_number", int),
     };
 
-  let tracks = json =>
-    Json.Decode.{itemss: json |> field("items", list(track))};
+  let tracks = json => Json.Decode.{itemss: json |> field("items", list(track))};
 
   let album = json =>
     Json.Decode.{
@@ -76,12 +75,10 @@ module Decode = {
       images: json |> field("images", list(image)),
       artists: json |> field("artists", list(artist)),
       uri: json |> field("uri", string),
-      tracks: json |> field("tracks", tracks)
+      tracks: json |> field("tracks", tracks),
     };
 
-  let albums = json =>
-    Json.Decode.{items: json |> field("items", list(album))};
+  let albums = json => Json.Decode.{items: json |> field("items", list(album))};
 
-  let response = json =>
-    Json.Decode.{albums: json |> field("albums", albums)};
+  let response = json => Json.Decode.{albums: json |> field("albums", albums)};
 };

@@ -1,7 +1,6 @@
 let baseUrl = "https://api.spotify.com/v1";
 
-let reqBody = payload =>
-  payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make;
+let reqBody = payload => payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make;
 
 type request =
   | NewReleases
@@ -17,8 +16,7 @@ let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =
   Fetch.fetchWithInit(
     baseUrl ++ endpoint,
     Fetch.RequestInit.make(
-      ~headers=
-        Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
+      ~headers=Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
       ~method_=method,
       (),
     ),
@@ -33,11 +31,9 @@ let playSong = (trackUri, contextUri, deviceId, accessToken) => {
   Fetch.fetchWithInit(
     baseUrl ++ "/me/player/play?device_id=" ++ deviceId,
     Fetch.RequestInit.make(
-      ~headers=
-        Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
+      ~headers=Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
       ~method_=Put,
-      ~body=
-        payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
+      ~body=payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
       (),
     ),
   );
@@ -52,10 +48,6 @@ let request = (request, accessToken) =>
   | Next => requestBase("/me/player/next", Post, accessToken)
   | Previous => requestBase("/me/player/previous", Post, accessToken)
   | Search(keywords) =>
-    requestBase(
-      "/search?type=album&limit=50&q=" ++ keywords,
-      Get,
-      accessToken,
-    )
+    requestBase("/search?type=album&limit=50&q=" ++ keywords, Get, accessToken)
   | AlbumDetails(id) => requestBase("/albums/" ++ id, Get, accessToken)
   };

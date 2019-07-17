@@ -22,8 +22,7 @@ module Styles = {
       boxShadow(~x=px(0), ~y=px(2), ~blur=px(4), rgba(12, 38, 69, 0.3)),
     ]);
 
-  let container =
-    style([position(`fixed), width(`percent(100.0)), zIndex(10)]);
+  let container = style([position(`fixed), width(`percent(100.0)), zIndex(10)]);
 
   let title =
     style([
@@ -33,7 +32,7 @@ module Styles = {
       margin(px(0)),
       marginLeft(px(5)),
       fontWeight(`num(700)),
-      letterSpacing(px(2))
+      letterSpacing(px(2)),
       //textTransform(`uppercase),
     ]);
 };
@@ -42,9 +41,7 @@ module Styles = {
 let make = () => {
   <div className=Styles.container>
     <div className=Styles.titleBar>
-      <h1 className=Styles.title>
-        {ReasonReact.string("Reason Spotify client")}
-      </h1>
+      <h1 className=Styles.title> {ReasonReact.string("Reason Spotify client")} </h1>
       <LoginButton />
     </div>
     <div className=Styles.controls> <Player /> <Visualizer /> </div>

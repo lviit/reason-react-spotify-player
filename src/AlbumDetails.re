@@ -11,12 +11,7 @@ module Styles = {
       bottom(`zero),
       top(px(90)),
       transform(translateX(`percent(albumDetailsOpen ? 0.0 : 100.0))),
-      transition(
-        ~duration=200,
-        ~delay=0,
-        ~timingFunction=`easeInOut,
-        "transform",
-      ),
+      transition(~duration=200, ~delay=0, ~timingFunction=`easeInOut, "transform"),
       boxShadow(~x=px(0), ~y=px(0), ~blur=px(10), rgba(12, 38, 69, 0.3)),
       zIndex(1),
       overflow(`auto),
@@ -24,8 +19,7 @@ module Styles = {
       backgroundColor(hex("fff")),
     ]);
 
-  let infoContainer =
-    style([display(`flex), flexDirection(`column), padding(px(25))]);
+  let infoContainer = style([display(`flex), flexDirection(`column), padding(px(25))]);
 
   let track =
     style([
@@ -42,15 +36,10 @@ module Styles = {
 
 module Track = {
   [@react.component]
-  let make =
-      (
-        ~track as {name, uri, track_number, duration_ms}: AlbumData.track,
-        ~albumUri,
-      ) => {
+  let make = (~track as {name, uri, track_number, duration_ms}: AlbumData.track, ~albumUri) => {
     let (_, dispatch) = React.useContext(storeContext);
 
-    <span
-      className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
+    <span className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
       {ReasonReact.string(
          string_of_int(track_number)
          ++ ". "
@@ -79,9 +68,7 @@ let make = () => {
   <div className={Styles.container(state.albumDetailsOpen)}>
     <img className=Styles.image src=image alt={state.albumDetails.name} />
     <div className=Styles.infoContainer>
-      <h2 className=Styles.albumTitle>
-        {React.string(state.albumDetails.name)}
-      </h2>
+      <h2 className=Styles.albumTitle> {React.string(state.albumDetails.name)} </h2>
       <span className=Styles.artistName> {React.string(artist)} </span>
       {List.map(
          track => <Track track albumUri={state.albumDetails.uri} />,

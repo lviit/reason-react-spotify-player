@@ -5,8 +5,7 @@ let rec join = (char: string, list: list(string)): string =>
   | [head, ...tail] => head ++ char ++ join(char, tail)
   };
 
-
-let formatDuration = (progress: int): string  => {
+let formatDuration = (progress: int): string => {
   let minutes = string_of_int(progress / 60);
   let seconds =
     switch (progress) {
@@ -16,5 +15,4 @@ let formatDuration = (progress: int): string  => {
     };
 
   minutes ++ ":" ++ seconds;
-}
-
+};

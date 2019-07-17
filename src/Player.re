@@ -33,9 +33,7 @@ let make = () => {
   <div className=Styles.container>
     <div className=Styles.nowPlaying>
       <span> {ReasonReact.string(artist ++ " - ")} </span>
-      <span className=Styles.song>
-        {ReasonReact.string(state.data.name)}
-      </span>
+      <span className=Styles.song> {ReasonReact.string(state.data.name)} </span>
       <span className=Styles.progress>
         {ReasonReact.string(" - " ++ formatDuration(state.progress))}
       </span>

@@ -16,12 +16,7 @@ module Styles = {
     style([
       display(`grid),
       gridAutoRows(px(300)),
-      gridTemplateColumns([
-        `percent(25.0),
-        `percent(25.0),
-        `percent(25.0),
-        `percent(25.0),
-      ]),
+      gridTemplateColumns([`percent(25.0), `percent(25.0), `percent(25.0), `percent(25.0)]),
       //gridTemplateColumns(repeat(12, minmax(px(100), fr(1)))),
       //grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       gridGap(px(3)),

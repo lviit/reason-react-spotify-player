@@ -48,15 +48,11 @@ module Main = {
     <React.Fragment>
       <Header />
       {state.albumDetailsOpen
-         ? <div
-             className=Styles.overlay
-             onClick={_ => CloseAlbumDetails->dispatch}
-           />
+         ? <div className=Styles.overlay onClick={_ => CloseAlbumDetails->dispatch} />
          : ReasonReact.null}
       <AlbumDetails />
       <div className={Styles.main(state.albumDetailsOpen)}>
-        {state.player.loading
-           ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}
+        {state.player.loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}
       </div>
     </React.Fragment>;
   };

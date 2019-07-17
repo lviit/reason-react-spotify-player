@@ -23,12 +23,7 @@ module Styles = {
       cursor(`pointer),
     ]);
 
-  let title =
-    style([
-      marginTop(0 |> px),
-      marginBottom(10 |> px),
-      fontSize(24 |> px),
-    ]);
+  let title = style([marginTop(0 |> px), marginBottom(10 |> px), fontSize(24 |> px)]);
 
   let info =
     style([
@@ -36,10 +31,7 @@ module Styles = {
       background(
         linearGradient(
           deg(0.0),
-          [
-            (`percent(0.0), rgba(0, 0, 0, 1.0)),
-            (`percent(100.0), rgba(0, 0, 0, 0.0)),
-          ],
+          [(`percent(0.0), rgba(0, 0, 0, 1.0)), (`percent(100.0), rgba(0, 0, 0, 0.0))],
         ),
       ),
     ]);
