@@ -22,6 +22,7 @@ type state = {
   albumData: list(AlbumData.album),
   player,
   albumDetailsLoading: bool,
+  albumDetailsOpen: bool,
   albumDetails: AlbumData.albumDetails,
 };
 
@@ -37,6 +38,8 @@ type reducer =
   | FetchDataFulfilled(response)
   | FetchAlbumsPending
   | FetchAlbumsFulfilled(AlbumData.response)
+  | OpenAlbumDetails
+  | CloseAlbumDetails
   | FetchAlbumDetailsPending
   | FetchAlbumDetailsFulfilled(AlbumData.albumDetails)
   | IncrementProgress
@@ -53,4 +56,5 @@ type actionType =
   | FetchNewReleases
   | FetchAlbumDetails(string)
   | LoadPlayer
-  | Search(string);
+  | Search(string)
+  | CloseAlbumDetails;

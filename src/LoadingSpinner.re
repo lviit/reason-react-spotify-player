@@ -3,8 +3,8 @@ module Styles = {
 
   let load8 =
     keyframes([
-      (0, [transform(`rotate(deg(0)))]),
-      (100, [transform(`rotate(deg(360)))]),
+      (0, [transform(`rotate(deg(0.0)))]),
+      (100, [transform(`rotate(deg(360.0)))]),
     ]);
 
   let spinner =

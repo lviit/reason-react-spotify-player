@@ -8,8 +8,8 @@ module Styles = {
     style([
       backgrounds([
         radialGradient([
-          (50, rgba(0, 0, 0, 0.0)),
-          (100, rgba(0, 0, 0, 0.3)),
+          (`percent(50.0), rgba(0, 0, 0, 0.0)),
+          (`percent(100.0), rgba(0, 0, 0, 0.3)),
         ]),
         `url(image.url),
       ]),
@@ -35,8 +35,11 @@ module Styles = {
       padding(20 |> px),
       background(
         linearGradient(
-          deg(0),
-          [(0, rgba(0, 0, 0, 1.0)), (100, rgba(0, 0, 0, 0.0))],
+          deg(0.0),
+          [
+            (`percent(0.0), rgba(0, 0, 0, 1.0)),
+            (`percent(100.0), rgba(0, 0, 0, 0.0)),
+          ],
         ),
       ),
     ]);

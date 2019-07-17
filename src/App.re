@@ -3,7 +3,23 @@ open StoreProvider;
 module Styles = {
   open Css;
 
-  let main = style([padding3(~top=px(115), ~h=px(20), ~bottom=px(20))]);
+  let main = albumDetailsOpen =>
+    style([
+      padding3(~top=px(115), ~h=px(20), ~bottom=px(20)),
+      filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
+    ]);
+
+  let overlay =
+    style([
+      display(`block),
+      zIndex(1),
+      position(`fixed),
+      top(`zero),
+      left(`zero),
+      right(`zero),
+      bottom(`zero),
+      backgroundColor(rgba(12, 38, 69, 0.38)),
+    ]);
 
   global(
     "body",
@@ -31,8 +47,14 @@ module Main = {
 
     <React.Fragment>
       <Header />
+      {state.albumDetailsOpen
+         ? <div
+             className=Styles.overlay
+             onClick={_ => CloseAlbumDetails->dispatch}
+           />
+         : ReasonReact.null}
       <AlbumDetails />
-      <div className=Styles.main>
+      <div className={Styles.main(state.albumDetailsOpen)}>
         {state.player.loading
            ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}
       </div>

@@ -99,6 +99,7 @@ let rec action = (dispatch, state, actionType: actionType) => {
     )
     |> ignore;
   | FetchAlbumDetails(id) =>
+    OpenAlbumDetails->dispatch;
     FetchAlbumDetailsPending->dispatch;
     Js.Promise.(
       request(AlbumDetails(id), accessToken)
@@ -107,6 +108,7 @@ let rec action = (dispatch, state, actionType: actionType) => {
       |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
     )
     |> ignore;
+  | CloseAlbumDetails => CloseAlbumDetails->dispatch;
   | LoadPlayer =>
     let hash = getLocationHash(window);
     //setLocationHash(window, "");

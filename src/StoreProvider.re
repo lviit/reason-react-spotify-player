@@ -19,6 +19,8 @@ let reducer = (state, reducer: StoreData.reducer) =>
       albumDataLoading: false,
       albumData: data.albums.items,
     }
+  | OpenAlbumDetails => {...state, albumDetailsOpen: true}
+  | CloseAlbumDetails => {...state, albumDetailsOpen: false}
   | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
   | FetchAlbumDetailsFulfilled(data) => {
       ...state,
@@ -61,6 +63,7 @@ let initialState = {
   albumDataLoading: false,
   albumData: [],
   albumDetailsLoading: false,
+  albumDetailsOpen: false,
   albumDetails: {
     name: "",
     release_date: "",

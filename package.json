@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "@glennsl/bs-json": "^3.0.0",
-    "bs-css": "^8.0.4",
+    "bs-css": "^9.0.1",
     "bs-emotion": "^0.1.1",
     "bs-emotion-ppx": "^0.0.6",
     "bs-fetch": "^0.3.1",

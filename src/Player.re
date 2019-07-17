@@ -1,4 +1,5 @@
 open StoreProvider;
+open Utils;
 
 module Styles = {
   open Css;
@@ -14,10 +15,9 @@ module Styles = {
     ]);
 
   let nowPlaying = style([fontSize(px(18)), letterSpacing(px(1))]);
-
   let controls = style([display(`flex), alignItems(`center)]);
-
   let song = style([fontWeight(`num(700))]);
+  let progress = style([fontSize(px(18)), letterSpacing(px(1))]);
 };
 
 [@react.component]
@@ -36,7 +36,9 @@ let make = () => {
       <span className=Styles.song>
         {ReasonReact.string(state.data.name)}
       </span>
-      <Progress />
+      <span className=Styles.progress>
+        {ReasonReact.string(" - " ++ formatDuration(state.progress))}
+      </span>
     </div>
     <div className=Styles.controls>
       <Button icon=Button.Prev action={_ => dispatch(Prev)} />

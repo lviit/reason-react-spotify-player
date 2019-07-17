@@ -1,46 +1,62 @@
 open StoreProvider;
+open Utils;
 
 module Styles = {
   open Css;
 
-  let container =
+  let container = albumDetailsOpen =>
     style([
-      position(`absolute),
-      right(px(0)),
+      position(`fixed),
+      right(`zero),
+      bottom(`zero),
       top(px(90)),
+      transform(translateX(`percent(albumDetailsOpen ? 0.0 : 100.0))),
+      transition(
+        ~duration=200,
+        ~delay=0,
+        ~timingFunction=`easeInOut,
+        "transform",
+      ),
+      boxShadow(~x=px(0), ~y=px(0), ~blur=px(10), rgba(12, 38, 69, 0.3)),
       zIndex(1),
-      width(px(300)),
+      overflow(`auto),
+      width(px(400)),
       backgroundColor(hex("fff")),
     ]);
 
   let infoContainer =
-    style([display(`flex), flexDirection(`column), padding(px(30))]);
+    style([display(`flex), flexDirection(`column), padding(px(25))]);
 
   let track =
     style([
       padding2(~v=px(15), ~h=px(0)),
       letterSpacing(px(1)),
-      borderBottom(px(2), `solid, hex("eee")),
+      borderTop(px(2), `solid, hex("eee")),
       hover([cursor(`pointer)]),
     ]);
 
-  let title = style([fontSize(px(24))]);
-
+  let albumTitle = style([fontSize(px(24)), margin(`zero)]);
+  let artistName = style([fontSize(px(18)), marginBottom(px(20))]);
   let image = style([width(`percent(100.0))]);
 };
 
 module Track = {
   [@react.component]
   let make =
-      (~track as {name, uri, track_number, duration_ms}: AlbumData.track, ~albumUri) => {
+      (
+        ~track as {name, uri, track_number, duration_ms}: AlbumData.track,
+        ~albumUri,
+      ) => {
     let (_, dispatch) = React.useContext(storeContext);
 
-    <span className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
+    <span
+      className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
       {ReasonReact.string(
          string_of_int(track_number)
          ++ ". "
          ++ name
-         ++ string_of_int(duration_ms),
+         ++ " - "
+         ++ formatDuration(duration_ms / 1000),
        )}
     </span>;
   };
@@ -60,14 +76,17 @@ let make = () => {
     | [head, ..._] => head.name
     };
 
-  <div className=Styles.container>
+  <div className={Styles.container(state.albumDetailsOpen)}>
     <img className=Styles.image src=image alt={state.albumDetails.name} />
     <div className=Styles.infoContainer>
-      <h2 className=Styles.title>
+      <h2 className=Styles.albumTitle>
         {React.string(state.albumDetails.name)}
       </h2>
-      <span> {React.string(artist)} </span>
-      {List.map(track => <Track track albumUri={state.albumDetails.uri} />, state.albumDetails.tracks.itemss)
+      <span className=Styles.artistName> {React.string(artist)} </span>
+      {List.map(
+         track => <Track track albumUri={state.albumDetails.uri} />,
+         state.albumDetails.tracks.itemss,
+       )
        ->Array.of_list
        ->ReasonReact.array}
     </div>
