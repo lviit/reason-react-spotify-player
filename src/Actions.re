@@ -7,7 +7,16 @@ open Js.Global;
 module URLSearchParams = {
   type t;
   [@bs.new] external make: string => t = "URLSearchParams";
-  [@bs.return nullable][@bs.send.pipe: t] external get: string => option(string) = "";
+  [@bs.return nullable] [@bs.send.pipe: t] external get: string => option(string) = "";
+};
+
+module Element = {
+  type document;
+  [@bs.send] external createElement: (document, string) => Dom.element = "";
+  [@bs.val] external document: document = "document";
+  [@bs.set] external setSrc: (Dom.element, string) => unit = "src";
+  [@bs.send] [@bs.scope "head"]
+  external appendToHead: (document, Dom.element) => unit = "appendChild";
 };
 
 module Decode = {
@@ -117,6 +126,10 @@ let rec action = (dispatch, state, actionType: actionType) => {
           player |> connect() |> ignore;
         },
       );
+
+      let scriptTag = Element.createElement(Element.document, "script");
+      Element.setSrc(scriptTag, "https://sdk.scdn.co/spotify-player.js");
+      Element.appendToHead(Element.document, scriptTag);
     };
   };
 };

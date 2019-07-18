@@ -43,7 +43,9 @@ let make = () => {
     <h1 className=Styles.title> {ReasonReact.string("Results")} </h1>
     {albumDataLoading && albumData->List.length > 0 ? <LoadingSpinner /> : ReasonReact.null}
     <div className=Styles.container>
-      {List.map(album => <Album album key={album.id} />, state.albumData) |> Array.of_list |> ReasonReact.array}
+      {List.map(album => <Album album key={album.id} />, albumData)
+       |> Array.of_list
+       |> ReasonReact.array}
     </div>
   </div>;
 };

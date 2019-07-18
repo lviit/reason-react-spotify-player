@@ -54,26 +54,24 @@ module Track = {
 [@react.component]
 let make = () => {
   let (state, _) = React.useContext(storeContext);
+  let {albumDetails: {images, artists, name, uri, id, tracks}, albumDetailsOpen}: StoreData.state = state;
   let image =
-    switch (state.albumDetails.images) {
+    switch (images) {
     | [] => ""
     | [head, ..._] => head.url
     };
   let artist =
-    switch (state.albumDetails.artists) {
+    switch (artists) {
     | [] => ""
     | [head, ..._] => head.name
     };
 
-  <div className={Styles.container(state.albumDetailsOpen)}>
-    <img className=Styles.image src=image alt={state.albumDetails.name} />
+  <div className={Styles.container(albumDetailsOpen)}>
+    <img className=Styles.image src=image alt=name />
     <div className=Styles.infoContainer>
-      <h2 className=Styles.albumTitle> {React.string(state.albumDetails.name)} </h2>
+      <h2 className=Styles.albumTitle> {React.string(name)} </h2>
       <span className=Styles.artistName> {React.string(artist)} </span>
-      {List.map(
-         track => <Track track albumUri={state.albumDetails.uri} />,
-         state.albumDetails.tracks.itemss,
-       )
+      {List.map(track => <Track track albumUri=uri key=track.uri />, tracks.itemss)
        ->Array.of_list
        ->ReasonReact.array}
     </div>
