@@ -2,9 +2,13 @@ open Request;
 open Spotify;
 open StoreData;
 open Js.Promise;
-open Webapi.Url;
+open Js.Global;
 
-[@bs.val] external setTimeout: (unit => unit, int) => float = "setTimeout";
+module URLSearchParams = {
+  type t;
+  [@bs.new] external make: string => t = "URLSearchParams";
+  [@bs.return nullable][@bs.send.pipe: t] external get: string => option(string) = "";
+};
 
 module Decode = {
   let artist = json => Json.Decode.{name: json |> field("name", string)};
@@ -28,8 +32,8 @@ let rec action = (dispatch, state, actionType: actionType) => {
 
   switch (actionType) {
   | PlaySong(trackUri, contextUri) =>
-    Js.Global.clearInterval(progressTimer);
-    let timerId = Js.Global.setInterval(() => IncrementProgress->dispatch, 1000);
+    clearInterval(progressTimer);
+    let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
     playSong(trackUri, contextUri, deviceId, accessToken)
     |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
     |> then_(_ => Play(timerId)->dispatch->resolve)
@@ -52,11 +56,11 @@ let rec action = (dispatch, state, actionType: actionType) => {
     |> then_(data => FetchDataFulfilled(data)->dispatch->resolve)
     |> ignore
   | Play =>
-    Js.Global.clearInterval(progressTimer);
-    let timerId = Js.Global.setInterval(() => IncrementProgress->dispatch, 1000);
+    clearInterval(progressTimer);
+    let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
     request(Play, accessToken) |> then_(_ => Play(timerId)->dispatch->resolve) |> ignore;
   | Pause =>
-    Js.Global.clearInterval(progressTimer);
+    clearInterval(progressTimer);
     request(Pause, accessToken) |> then_(_ => Pause->dispatch->resolve) |> ignore;
   | FetchNewReleases =>
     FetchAlbumsPending->dispatch;
@@ -82,38 +86,37 @@ let rec action = (dispatch, state, actionType: actionType) => {
     |> ignore;
   | CloseAlbumDetails => CloseAlbumDetails->dispatch
   | LoadPlayer =>
-    let hash = getLocationHash(window);
-    //setLocationHash(window, "");
     let accessToken =
-      switch (hash |> URLSearchParams.make |> URLSearchParams.get("#access_token", _)) {
-      | None => "none"
-      | Some(accessToken) => accessToken
-      };
-
-    PlayerLoading(accessToken) |> dispatch;
-
-    onSpotifyWebPlaybackSDKReady(
-      window,
-      () => {
-        let settings = settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
-        let player = createSpotifyPlayer(settings);
-        player |> addListener("initialization_error", state => state->messageGet->Js.log);
-        player |> addListener("authentication_error", state => state->messageGet->Js.log);
-        player |> addListener("account_error", state => state->messageGet->Js.log);
-        player |> addListener("playback_error", state => state->messageGet->Js.log);
-        player |> addListener("player_state_changed", state => state->Js.log);
-        player
-        |> addListener("ready", state => {
-             state->device_idGet->Js.log2("Ready with Device ID");
-             PlayerReady(state->device_idGet)->dispatch;
-           });
-        // dispatch ready here
-        player
-        |> addListener("not_ready", state =>
-             state |> device_idGet |> Js.log2("Device ID has gone offline")
-           );
-        player |> connectPlayer() |> ignore;
-      },
-    );
+      window->getLocationHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
+    switch (accessToken) {
+    | None => ()
+    | Some(accessToken) =>
+      setLocationHash(window, "");
+      PlayerLoading(accessToken) |> dispatch;
+      onSpotifyWebPlaybackSDKReady(
+        window,
+        () => {
+          let settings =
+            settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
+          let player = createSpotifyPlayer(settings);
+          player |> addListener("initialization_error", state => state->messageGet->Js.log);
+          player |> addListener("authentication_error", state => state->messageGet->Js.log);
+          player |> addListener("account_error", state => state->messageGet->Js.log);
+          player |> addListener("playback_error", state => state->messageGet->Js.log);
+          player |> addListener("player_state_changed", state => state->Js.log);
+          player
+          |> addListener("ready", state => {
+               state->device_idGet->Js.log2("Ready with Device ID");
+               PlayerReady(state->device_idGet)->dispatch;
+             });
+          // dispatch ready here
+          player
+          |> addListener("not_ready", state =>
+               state->device_idGet->Js.log2("Device ID has gone offline")
+             );
+          player |> connect() |> ignore;
+        },
+      );
+    };
   };
 };

@@ -18,8 +18,6 @@
   "dependencies": {
     "@glennsl/bs-json": "^3.0.0",
     "bs-css": "^9.0.1",
-    "bs-emotion": "^0.1.1",
-    "bs-emotion-ppx": "^0.0.6",
     "bs-fetch": "^0.3.1",
     "bs-webapi": "^0.14.3",
     "react": "^16.8.1",

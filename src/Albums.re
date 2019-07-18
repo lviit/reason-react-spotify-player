@@ -26,25 +26,24 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
+  let {albumData, albumDataLoading, player: {deviceId}}: StoreData.state = state;
 
   React.useEffect1(
     () => {
-      dispatch(FetchNewReleases);
+      switch (deviceId->String.length) {
+      | 0 => ()
+      | _ => dispatch(FetchNewReleases)
+      };
       Some(() => ());
     },
-    [||],
+    [|deviceId|],
   );
 
   <div>
     <h1 className=Styles.title> {ReasonReact.string("Results")} </h1>
-    {state.albumDataLoading ? <LoadingSpinner /> : ReasonReact.null}
+    {albumDataLoading && albumData->List.length > 0 ? <LoadingSpinner /> : ReasonReact.null}
     <div className=Styles.container>
-      {List.length(state.albumData) > 0
-         ? List.map(album => <Album album />, state.albumData)
-           |> Array.of_list
-           |> ReasonReact.array
-         : ReasonReact.string("No data available.")}
+      {List.map(album => <Album album key={album.id} />, state.albumData) |> Array.of_list |> ReasonReact.array}
     </div>
-    <div> {state.loading ? ReasonReact.string("...loading") : <div />} </div>
   </div>;
 };

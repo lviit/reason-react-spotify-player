@@ -1,5 +1,5 @@
 {
-  "name": "react-hooks-template",
+  "name": "reason-spotify-client",
   "reason": {
     "react-jsx": 3
   },
@@ -15,7 +15,6 @@
   "namespace": true,
   "bs-dependencies": [
     "reason-react",
-    "bs-webapi",
     "bs-fetch",
     "@glennsl/bs-json",
     "bs-css"

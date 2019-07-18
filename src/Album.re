@@ -45,7 +45,6 @@ let make = (~album as {name, id, images, artists, uri}: AlbumData.album) => {
 
   <div
     className={Styles.container(image)}
-    // onClick={_event => dispatch(PlaySong(uri))}>
     onClick={_ => FetchAlbumDetails(id)->dispatch}>
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>

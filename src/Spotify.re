@@ -5,7 +5,7 @@ type listener = {
 };
 
 type player;
-[@bs.send.pipe: player] external connectPlayer: unit => player = "connect";
+[@bs.send.pipe: player] external connect: unit => player = "connect";
 [@bs.send.pipe: player] external addListener: (string, listener => unit) => unit = "addListener";
 
 [@bs.deriving abstract]
