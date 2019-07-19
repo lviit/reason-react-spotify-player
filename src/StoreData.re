@@ -4,6 +4,7 @@ type item = {
   id: string,
   name: string,
   artists: list(artist),
+  duration_ms: int,
 };
 
 type player = {
@@ -44,7 +45,8 @@ type reducer =
   | FetchAlbumDetailsFulfilled(AlbumData.albumDetails)
   | IncrementProgress
   | PlayerLoading(string)
-  | PlayerReady(string);
+  | PlayerReady(string)
+  | Seek(int);
 
 type actionType =
   | Prev
@@ -57,4 +59,5 @@ type actionType =
   | FetchAlbumDetails(string)
   | LoadPlayer
   | Search(string)
-  | CloseAlbumDetails;
+  | CloseAlbumDetails
+  | Seek(int);

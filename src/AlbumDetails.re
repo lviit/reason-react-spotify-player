@@ -45,7 +45,7 @@ module Track = {
          ++ ". "
          ++ name
          ++ " - "
-         ++ formatDuration(duration_ms / 1000),
+         ++ formatDuration(duration_ms),
        )}
     </span>;
   };

@@ -23,26 +23,40 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
+  let {data: {name, duration_ms, artists}, progress, playing}: StoreData.state = state;
 
   let artist =
-    switch (state.data.artists) {
+    switch (artists) {
     | [] => ""
     | [a, ..._] => a.name
     };
 
+  let handleProgressChange = e => {
+    let value = e->ReactEvent.Synthetic.target##value->int_of_string;
+    Seek(value)->dispatch;
+  };
+
   <div className=Styles.container>
     <div className=Styles.nowPlaying>
       <span> {ReasonReact.string(artist ++ " - ")} </span>
-      <span className=Styles.song> {ReasonReact.string(state.data.name)} </span>
+      <span className=Styles.song> {ReasonReact.string(name)} </span>
       <span className=Styles.progress>
-        {ReasonReact.string(" - " ++ formatDuration(state.progress))}
+        {ReasonReact.string(" - " ++ formatDuration(progress))}
       </span>
     </div>
     <div className=Styles.controls>
+      <input
+        type_="range"
+        value={progress->string_of_int}
+        name="progress"
+        min=0
+        max={duration_ms->string_of_int}
+        onChange=handleProgressChange
+      />
       <Button icon=Button.Prev action={_ => dispatch(Prev)} />
       <Button
-        icon={state.playing ? Button.Pause : Button.Play}
-        action={_ => dispatch(state.playing ? Pause : Play)}
+        icon={playing ? Button.Pause : Button.Play}
+        action={_ => dispatch(playing ? Pause : Play)}
       />
       <Button icon=Button.Next action={_ => dispatch(Next)} />
     </div>

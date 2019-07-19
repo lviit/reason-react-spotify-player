@@ -27,6 +27,7 @@ module Decode = {
       id: json |> field("id", string),
       name: json |> field("name", string),
       artists: json |> field("artists", list(artist)),
+      duration_ms: json |> field("duration_ms", int),
     };
 
   let response = json =>
@@ -94,11 +95,15 @@ let rec action = (dispatch, state, actionType: actionType) => {
     |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
     |> ignore;
   | CloseAlbumDetails => CloseAlbumDetails->dispatch
+  | Seek(progress) =>
+    request(Seek(progress), accessToken)
+    |> then_(_ => Seek(progress)->dispatch->resolve)
+    |> ignore
   | LoadPlayer =>
     let accessToken =
       window->getLocationHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
     switch (accessToken) {
-    | None => ()
+    | None => Js.log("No access token available")
     | Some(accessToken) =>
       setLocationHash(window, "");
       PlayerLoading(accessToken) |> dispatch;
@@ -113,16 +118,8 @@ let rec action = (dispatch, state, actionType: actionType) => {
           player |> addListener("account_error", state => state->messageGet->Js.log);
           player |> addListener("playback_error", state => state->messageGet->Js.log);
           player |> addListener("player_state_changed", state => state->Js.log);
-          player
-          |> addListener("ready", state => {
-               state->device_idGet->Js.log2("Ready with Device ID");
-               PlayerReady(state->device_idGet)->dispatch;
-             });
-          // dispatch ready here
-          player
-          |> addListener("not_ready", state =>
-               state->device_idGet->Js.log2("Device ID has gone offline")
-             );
+          player |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
+          player |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
           player |> connect() |> ignore;
         },
       );

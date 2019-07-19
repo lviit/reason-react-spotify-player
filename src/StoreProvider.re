@@ -5,13 +5,13 @@ let reducer = (state, reducer: StoreData.reducer) =>
   switch (reducer) {
   | Play(timerId) => {...state, playing: true, progressTimer: timerId}
   | Pause => {...state, playing: false}
-  | IncrementProgress => {...state, progress: state.progress + 1}
+  | IncrementProgress => {...state, progress: state.progress + 1000}
   | FetchDataPending => {...state, loading: true}
   | FetchDataFulfilled(data) => {
       ...state,
       loading: false,
       data: data.item,
-      progress: data.progress_ms / 1000,
+      progress: data.progress_ms,
     }
   | FetchAlbumsPending => {...state, albumDataLoading: true}
   | FetchAlbumsFulfilled(data) => {
@@ -21,6 +21,7 @@ let reducer = (state, reducer: StoreData.reducer) =>
     }
   | OpenAlbumDetails => {...state, albumDetailsOpen: true}
   | CloseAlbumDetails => {...state, albumDetailsOpen: false}
+  | Seek(progress) => { ...state, progress }
   | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
   | FetchAlbumDetailsFulfilled(data) => {
       ...state,
@@ -57,6 +58,7 @@ let initialState = {
     id: "",
     name: "",
     artists: [],
+    duration_ms: 0,
   },
   progress: 0,
   progressTimer: Js.Global.setInterval(() => (), 1000000), // fix so we can default to unit

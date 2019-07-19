@@ -9,6 +9,7 @@ type request =
   | Pause
   | Next
   | Previous
+  | Seek(int)
   | Search(string)
   | AlbumDetails(string);
 
@@ -47,6 +48,7 @@ let request = (request, accessToken) =>
   | Pause => requestBase("/me/player/pause", Put, accessToken)
   | Next => requestBase("/me/player/next", Post, accessToken)
   | Previous => requestBase("/me/player/previous", Post, accessToken)
+  | Seek(position) => requestBase("/me/player/seek?position_ms=" ++ string_of_int(position), Put, accessToken)
   | Search(keywords) =>
     requestBase("/search?type=album&limit=50&q=" ++ keywords, Get, accessToken)
   | AlbumDetails(id) => requestBase("/albums/" ++ id, Get, accessToken)
