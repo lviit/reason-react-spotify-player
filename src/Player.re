@@ -4,6 +4,26 @@ open Utils;
 module Styles = {
   open Css;
 
+  let progressBar =
+    style([
+      width(px(200)),
+      unsafe("-webkit-appearance", "none"),
+      backgroundColor(hex("fff")),
+      height(px(4)),
+      borderRadius(px(2)),
+      focus([outlineStyle(`none)]),
+      selector(
+        "::-webkit-slider-thumb",
+        [
+          unsafe("-webkit-appearance", "none"),
+          backgroundColor(hex("fff")),
+          height(px(16)),
+          width(px(16)),
+          borderRadius(px(8)),
+        ],
+      ),
+    ]);
+
   let container =
     style([
       padding2(~v=px(0), ~h=px(10)),
@@ -46,11 +66,12 @@ let make = () => {
     </div>
     <div className=Styles.controls>
       <input
+        className=Styles.progressBar
         type_="range"
-        value={progress->string_of_int}
         name="progress"
         min=0
         max={duration_ms->string_of_int}
+        value={progress->string_of_int}
         onChange=handleProgressChange
       />
       <Button icon=Button.Prev action={_ => dispatch(Prev)} />

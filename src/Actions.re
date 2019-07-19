@@ -19,25 +19,7 @@ module Element = {
   external appendToHead: (document, Dom.element) => unit = "appendChild";
 };
 
-module Decode = {
-  let artist = json => Json.Decode.{name: json |> field("name", string)};
-
-  let item = json =>
-    Json.Decode.{
-      id: json |> field("id", string),
-      name: json |> field("name", string),
-      artists: json |> field("artists", list(artist)),
-      duration_ms: json |> field("duration_ms", int),
-    };
-
-  let response = json =>
-    Json.Decode.{
-      item: json |> field("item", item),
-      progress_ms: json |> field("progress_ms", int),
-    };
-};
-
-let rec action = (dispatch, state, actionType: actionType) => {
+let action = (dispatch, state, actionType: actionType) => {
   let {player: {deviceId, accessToken}, progressTimer} = state;
 
   switch (actionType) {
@@ -45,26 +27,10 @@ let rec action = (dispatch, state, actionType: actionType) => {
     clearInterval(progressTimer);
     let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
     playSong(trackUri, contextUri, deviceId, accessToken)
-    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
     |> then_(_ => Play(timerId)->dispatch->resolve)
-    // wtf why the timeout
     |> ignore;
-  | Prev =>
-    request(Previous, accessToken)
-    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
-    // wtf why the timeout
-    |> ignore
-  | Next =>
-    request(Next, accessToken)
-    |> then_(_ => setTimeout(_ => action(dispatch, state, FetchPlayer), 300)->resolve)
-    // wtf why the timeout
-    |> ignore
-  | FetchPlayer =>
-    request(Player, accessToken)
-    |> then_(Fetch.Response.json)
-    |> then_(json => json->Decode.response->resolve)
-    |> then_(data => FetchDataFulfilled(data)->dispatch->resolve)
-    |> ignore
+  | Prev => request(Previous, accessToken) |> ignore
+  | Next => request(Next, accessToken) |> ignore
   | Play =>
     clearInterval(progressTimer);
     let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
@@ -117,7 +83,10 @@ let rec action = (dispatch, state, actionType: actionType) => {
           player |> addListener("authentication_error", state => state->messageGet->Js.log);
           player |> addListener("account_error", state => state->messageGet->Js.log);
           player |> addListener("playback_error", state => state->messageGet->Js.log);
-          player |> addListener("player_state_changed", state => state->Js.log);
+          player
+          |> addStateListener("player_state_changed", state =>
+               state->StoreData.Decode.playerState->PlayerStateChange->dispatch
+             );
           player |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
           player |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
           player |> connect() |> ignore;

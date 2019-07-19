@@ -27,16 +27,17 @@ type state = {
   albumDetails: AlbumData.albumDetails,
 };
 
-type response = {
-  item,
-  progress_ms: int,
+type track_window = {current_track: item};
+
+type playerState = {
+  position: int,
+  paused: bool,
+  track_window,
 };
 
 type reducer =
   | Play(Js.Global.intervalId)
   | Pause
-  | FetchDataPending
-  | FetchDataFulfilled(response)
   | FetchAlbumsPending
   | FetchAlbumsFulfilled(AlbumData.response)
   | OpenAlbumDetails
@@ -46,6 +47,7 @@ type reducer =
   | IncrementProgress
   | PlayerLoading(string)
   | PlayerReady(string)
+  | PlayerStateChange(playerState)
   | Seek(int);
 
 type actionType =
@@ -54,10 +56,30 @@ type actionType =
   | PlaySong(string, string)
   | Play
   | Pause
-  | FetchPlayer
   | FetchNewReleases
   | FetchAlbumDetails(string)
   | LoadPlayer
   | Search(string)
   | CloseAlbumDetails
   | Seek(int);
+
+module Decode = {
+  let artist = json => Json.Decode.{name: json |> field("name", string)};
+
+  let item = json =>
+    Json.Decode.{
+      id: json |> field("id", string),
+      name: json |> field("name", string),
+      artists: json |> field("artists", list(artist)),
+      duration_ms: json |> field("duration_ms", int),
+    };
+
+  let track_window = json => Json.Decode.{current_track: json |> field("current_track", item)};
+
+  let playerState = json =>
+    Json.Decode.{
+      position: json |> field("position", int),
+      paused: json |> field("paused", bool),
+      track_window: json |> field("track_window", track_window),
+    };
+};

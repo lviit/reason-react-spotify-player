@@ -6,12 +6,12 @@ let reducer = (state, reducer: StoreData.reducer) =>
   | Play(timerId) => {...state, playing: true, progressTimer: timerId}
   | Pause => {...state, playing: false}
   | IncrementProgress => {...state, progress: state.progress + 1000}
-  | FetchDataPending => {...state, loading: true}
-  | FetchDataFulfilled(data) => {
+  | PlayerStateChange(playerState) => {
       ...state,
       loading: false,
-      data: data.item,
-      progress: data.progress_ms,
+      data: playerState.track_window.current_track,
+      progress: playerState.position,
+      playing: !playerState.paused,
     }
   | FetchAlbumsPending => {...state, albumDataLoading: true}
   | FetchAlbumsFulfilled(data) => {
@@ -21,7 +21,7 @@ let reducer = (state, reducer: StoreData.reducer) =>
     }
   | OpenAlbumDetails => {...state, albumDetailsOpen: true}
   | CloseAlbumDetails => {...state, albumDetailsOpen: false}
-  | Seek(progress) => { ...state, progress }
+  | Seek(progress) => {...state, progress}
   | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
   | FetchAlbumDetailsFulfilled(data) => {
       ...state,
