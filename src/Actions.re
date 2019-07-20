@@ -1,96 +1,90 @@
 open Request;
-open Spotify;
+open Externals;
 open StoreData;
 open Js.Promise;
 open Js.Global;
 
-module URLSearchParams = {
-  type t;
-  [@bs.new] external make: string => t = "URLSearchParams";
-  [@bs.return nullable] [@bs.send.pipe: t] external get: string => option(string) = "";
-};
+let stopTimer = progressTimer =>
+  switch (progressTimer) {
+  | None => ()
+  | Some(progressTimer) => clearInterval(progressTimer)
+  };
 
-module Element = {
-  type document;
-  [@bs.send] external createElement: (document, string) => Dom.element = "";
-  [@bs.val] external document: document = "document";
-  [@bs.set] external setSrc: (Dom.element, string) => unit = "src";
-  [@bs.send] [@bs.scope "head"]
-  external appendToHead: (document, Dom.element) => unit = "appendChild";
-};
+let startTimer = dispatch => setInterval(_ => IncrementProgress->dispatch, 1000);
 
 let action = (dispatch, state, actionType: actionType) => {
-  let {player: {deviceId, accessToken}, progressTimer} = state;
+  let {deviceId, accessToken, progressTimer} = state.player;
 
   switch (actionType) {
   | PlaySong(trackUri, contextUri) =>
-    clearInterval(progressTimer);
-    let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
+    progressTimer->stopTimer;
+    let timerId = startTimer(dispatch);
     playSong(trackUri, contextUri, deviceId, accessToken)
-    |> then_(_ => Play(timerId)->dispatch->resolve)
+    |> then_(_ => timerId->Play->dispatch->resolve)
     |> ignore;
   | Prev => request(Previous, accessToken) |> ignore
   | Next => request(Next, accessToken) |> ignore
   | Play =>
-    clearInterval(progressTimer);
-    let timerId = setInterval(() => IncrementProgress->dispatch, 1000);
-    request(Play, accessToken) |> then_(_ => Play(timerId)->dispatch->resolve) |> ignore;
+    let timerId = startTimer(dispatch);
+    request(Play, accessToken) |> then_(_ => timerId->Play->dispatch->resolve) |> ignore;
   | Pause =>
-    clearInterval(progressTimer);
+    progressTimer->stopTimer;
     request(Pause, accessToken) |> then_(_ => Pause->dispatch->resolve) |> ignore;
   | FetchNewReleases =>
     FetchAlbumsPending->dispatch;
     request(NewReleases, accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->AlbumData.Decode.response->resolve)
-    |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
+    |> then_(json => json->Decode.albums->resolve)
+    |> then_(data => data->FetchAlbumsFulfilled->dispatch->resolve)
     |> ignore;
   | Search(keywords) =>
     FetchAlbumsPending->dispatch;
-    request(Search(keywords), accessToken)
+    request(keywords->Search, accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->AlbumData.Decode.response->resolve)
-    |> then_(data => FetchAlbumsFulfilled(data)->dispatch->resolve)
+    |> then_(json => json->Decode.albums->resolve)
+    |> then_(data => data->FetchAlbumsFulfilled->dispatch->resolve)
     |> ignore;
   | FetchAlbumDetails(id) =>
     OpenAlbumDetails->dispatch;
     FetchAlbumDetailsPending->dispatch;
     request(AlbumDetails(id), accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->AlbumData.Decode.albumDetails->resolve)
-    |> then_(data => FetchAlbumDetailsFulfilled(data)->dispatch->resolve)
+    |> then_(json => json->Decode.albumDetails->resolve)
+    |> then_(data => data->FetchAlbumDetailsFulfilled->dispatch->resolve)
     |> ignore;
   | CloseAlbumDetails => CloseAlbumDetails->dispatch
   | Seek(progress) =>
-    request(Seek(progress), accessToken)
-    |> then_(_ => Seek(progress)->dispatch->resolve)
+    request(progress->Seek, accessToken)
+    |> then_(_ => progress->Seek->dispatch->resolve)
     |> ignore
   | LoadPlayer =>
     let accessToken =
-      window->getLocationHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
+      window->Location.getHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
     switch (accessToken) {
     | None => Js.log("No access token available")
     | Some(accessToken) =>
-      setLocationHash(window, "");
+      Location.setHash(window, "");
       PlayerLoading(accessToken) |> dispatch;
-      onSpotifyWebPlaybackSDKReady(
-        window,
-        () => {
-          let settings =
-            settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
-          let player = createSpotifyPlayer(settings);
-          player |> addListener("initialization_error", state => state->messageGet->Js.log);
-          player |> addListener("authentication_error", state => state->messageGet->Js.log);
-          player |> addListener("account_error", state => state->messageGet->Js.log);
-          player |> addListener("playback_error", state => state->messageGet->Js.log);
-          player
-          |> addStateListener("player_state_changed", state =>
-               state->StoreData.Decode.playerState->PlayerStateChange->dispatch
-             );
-          player |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
-          player |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
-          player |> connect() |> ignore;
-        },
+      Spotify.(
+        onSpotifyWebPlaybackSDKReady(
+          window,
+          () => {
+            let settings =
+              settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
+            let player = createSpotifyPlayer(settings);
+            player |> addListener("initialization_error", state => state->messageGet->Js.log);
+            player |> addListener("authentication_error", state => state->messageGet->Js.log);
+            player |> addListener("account_error", state => state->messageGet->Js.log);
+            player |> addListener("playback_error", state => state->messageGet->Js.log);
+            player
+            |> addStateListener("player_state_changed", state =>
+                 state->Decode.playerState->PlayerStateChange->dispatch
+               );
+            player |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
+            player |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
+            player |> connect() |> ignore;
+          },
+        )
       );
 
       let scriptTag = Element.createElement(Element.document, "script");

@@ -41,11 +41,7 @@ module Track = {
 
     <span className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
       {ReasonReact.string(
-         string_of_int(track_number)
-         ++ ". "
-         ++ name
-         ++ " - "
-         ++ formatDuration(duration_ms),
+         track_number->string_of_int ++ ". " ++ name ++ " - " ++ duration_ms->formatDuration,
        )}
     </span>;
   };
@@ -54,26 +50,22 @@ module Track = {
 [@react.component]
 let make = () => {
   let (state, _) = React.useContext(storeContext);
-  let {albumDetails: {images, artists, name, uri, id, tracks}, albumDetailsOpen}: StoreData.state = state;
-  let image =
-    switch (images) {
-    | [] => ""
-    | [head, ..._] => head.url
-    };
-  let artist =
-    switch (artists) {
-    | [] => ""
-    | [head, ..._] => head.name
-    };
+  switch (state.albumDetails) {
+  | None => <div className={Styles.container(false)} />
+  | Some(albumDetails) =>
+    let {images, artists, name, uri, tracks}: AlbumData.albumDetails = albumDetails;
+    let image = List.hd(images).url;
+    let artist = List.hd(artists).name;
 
-  <div className={Styles.container(albumDetailsOpen)}>
-    <img className=Styles.image src=image alt=name />
-    <div className=Styles.infoContainer>
-      <h2 className=Styles.albumTitle> {React.string(name)} </h2>
-      <span className=Styles.artistName> {React.string(artist)} </span>
-      {List.map(track => <Track track albumUri=uri key=track.uri />, tracks.itemss)
-       ->Array.of_list
-       ->ReasonReact.array}
-    </div>
-  </div>;
+    <div className={Styles.container(state.albumDetailsOpen)}>
+      <img className=Styles.image src=image alt=name />
+      <div className=Styles.infoContainer>
+        <h2 className=Styles.albumTitle> {React.string(name)} </h2>
+        <span className=Styles.artistName> {React.string(artist)} </span>
+        {List.map(track => <Track track albumUri=uri key={track.uri} />, tracks.items)
+         ->Array.of_list
+         ->ReasonReact.array}
+      </div>
+    </div>;
+  };
 };

@@ -1,3 +1,5 @@
+open StoreProvider;
+
 module Styles = {
   open Css;
 
@@ -39,10 +41,12 @@ module Styles = {
 
 [@react.component]
 let make = () => {
+  let (state, _) = React.useContext(storeContext);
+
   <div className=Styles.container>
     <div className=Styles.titleBar>
       <h1 className=Styles.title> {ReasonReact.string("Reason Spotify client")} </h1>
-      <LoginButton />
+      {state.player.deviceId->String.length === 0 ? <LoginButton /> : ReasonReact.null}
     </div>
     <div className=Styles.controls> <Player /> <Visualizer /> </div>
   </div>;

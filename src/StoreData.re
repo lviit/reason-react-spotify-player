@@ -1,9 +1,7 @@
-type artist = {name: string};
-
-type item = {
+type currentTrack = {
   id: string,
   name: string,
-  artists: list(artist),
+  artists: list(AlbumData.artist),
   duration_ms: int,
 };
 
@@ -11,35 +9,34 @@ type player = {
   accessToken: string,
   deviceId: string,
   loading: bool,
+  playing: bool,
+  progress: int,
+  progressTimer: option(Js.Global.intervalId),
 };
 
 type state = {
-  data: item,
-  loading: bool,
-  playing: bool,
-  progress: int,
-  progressTimer: Js.Global.intervalId,
+  player,
+  currentTrack: option(currentTrack),
   albumDataLoading: bool,
   albumData: list(AlbumData.album),
-  player,
   albumDetailsLoading: bool,
   albumDetailsOpen: bool,
-  albumDetails: AlbumData.albumDetails,
+  albumDetails: option(AlbumData.albumDetails),
 };
 
-type track_window = {current_track: item};
+type trackWindow = {current_track: currentTrack};
 
 type playerState = {
   position: int,
   paused: bool,
-  track_window,
+  track_window: trackWindow,
 };
 
 type reducer =
   | Play(Js.Global.intervalId)
   | Pause
   | FetchAlbumsPending
-  | FetchAlbumsFulfilled(AlbumData.response)
+  | FetchAlbumsFulfilled(AlbumData.albums)
   | OpenAlbumDetails
   | CloseAlbumDetails
   | FetchAlbumDetailsPending
@@ -62,24 +59,3 @@ type actionType =
   | Search(string)
   | CloseAlbumDetails
   | Seek(int);
-
-module Decode = {
-  let artist = json => Json.Decode.{name: json |> field("name", string)};
-
-  let item = json =>
-    Json.Decode.{
-      id: json |> field("id", string),
-      name: json |> field("name", string),
-      artists: json |> field("artists", list(artist)),
-      duration_ms: json |> field("duration_ms", int),
-    };
-
-  let track_window = json => Json.Decode.{current_track: json |> field("current_track", item)};
-
-  let playerState = json =>
-    Json.Decode.{
-      position: json |> field("position", int),
-      paused: json |> field("paused", bool),
-      track_window: json |> field("track_window", track_window),
-    };
-};

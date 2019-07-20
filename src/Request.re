@@ -1,6 +1,6 @@
-let baseUrl = "https://api.spotify.com/v1";
+open Js.Json;
 
-let reqBody = payload => payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make;
+let baseUrl = "https://api.spotify.com/v1";
 
 type request =
   | NewReleases
@@ -14,27 +14,25 @@ type request =
   | AlbumDetails(string);
 
 let requestBase = (endpoint: string, method: Fetch.requestMethod, accessToken) =>
-  Fetch.fetchWithInit(
-    baseUrl ++ endpoint,
-    Fetch.RequestInit.make(
-      ~headers=Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
-      ~method_=method,
-      (),
-    ),
-  );
+  Fetch.RequestInit.make(
+    ~headers=Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
+    ~method_=method,
+    (),
+  )
+  |> Fetch.fetchWithInit(baseUrl ++ endpoint);
 
 let playSong = (trackUri, contextUri, deviceId, accessToken) => {
   let offset = Js.Dict.empty();
   let payload = Js.Dict.empty();
-  Js.Dict.set(offset, "uri", Js.Json.string(trackUri));
-  Js.Dict.set(payload, "offset", Js.Json.object_(offset));
-  Js.Dict.set(payload, "context_uri", Js.Json.string(contextUri));
+  Js.Dict.set(offset, "uri", string(trackUri));
+  Js.Dict.set(payload, "offset", object_(offset));
+  Js.Dict.set(payload, "context_uri", string(contextUri));
   Fetch.fetchWithInit(
     baseUrl ++ "/me/player/play?device_id=" ++ deviceId,
     Fetch.RequestInit.make(
       ~headers=Fetch.HeadersInit.make({"Authorization": "Bearer " ++ accessToken}),
       ~method_=Put,
-      ~body=payload |> Js.Json.object_ |> Js.Json.stringify |> Fetch.BodyInit.make,
+      ~body=payload->object_->stringify->Fetch.BodyInit.make,
       (),
     ),
   );
@@ -48,7 +46,8 @@ let request = (request, accessToken) =>
   | Pause => requestBase("/me/player/pause", Put, accessToken)
   | Next => requestBase("/me/player/next", Post, accessToken)
   | Previous => requestBase("/me/player/previous", Post, accessToken)
-  | Seek(position) => requestBase("/me/player/seek?position_ms=" ++ string_of_int(position), Put, accessToken)
+  | Seek(position) =>
+    requestBase("/me/player/seek?position_ms=" ++ string_of_int(position), Put, accessToken)
   | Search(keywords) =>
     requestBase("/search?type=album&limit=50&q=" ++ keywords, Get, accessToken)
   | AlbumDetails(id) => requestBase("/albums/" ++ id, Get, accessToken)

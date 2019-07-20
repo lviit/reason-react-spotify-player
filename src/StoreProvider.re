@@ -3,30 +3,36 @@ open StoreData;
 
 let reducer = (state, reducer: StoreData.reducer) =>
   switch (reducer) {
-  | Play(timerId) => {...state, playing: true, progressTimer: timerId}
-  | Pause => {...state, playing: false}
-  | IncrementProgress => {...state, progress: state.progress + 1000}
+  | Play(timerId) => {
+      ...state,
+      player: {
+        ...state.player,
+        playing: true,
+        progressTimer: Some(timerId),
+      },
+    }
+  | Pause => {
+      ...state,
+      player: {
+        ...state.player,
+        playing: false,
+      },
+    }
+  | IncrementProgress => {
+      ...state,
+      player: {
+        ...state.player,
+        progress: state.player.progress + 1000,
+      },
+    }
   | PlayerStateChange(playerState) => {
       ...state,
-      loading: false,
-      data: playerState.track_window.current_track,
-      progress: playerState.position,
-      playing: !playerState.paused,
-    }
-  | FetchAlbumsPending => {...state, albumDataLoading: true}
-  | FetchAlbumsFulfilled(data) => {
-      ...state,
-      albumDataLoading: false,
-      albumData: data.albums.items,
-    }
-  | OpenAlbumDetails => {...state, albumDetailsOpen: true}
-  | CloseAlbumDetails => {...state, albumDetailsOpen: false}
-  | Seek(progress) => {...state, progress}
-  | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
-  | FetchAlbumDetailsFulfilled(data) => {
-      ...state,
-      albumDetailsLoading: false,
-      albumDetails: data,
+      currentTrack: Some(playerState.track_window.current_track),
+      player: {
+        ...state.player,
+        progress: playerState.position,
+        playing: !playerState.paused,
+      },
     }
   | PlayerLoading(accessToken) => {
       ...state,
@@ -44,39 +50,44 @@ let reducer = (state, reducer: StoreData.reducer) =>
         deviceId,
       },
     }
+  | FetchAlbumsPending => {...state, albumDataLoading: true}
+  | FetchAlbumsFulfilled(data) => {
+      ...state,
+      albumDataLoading: false,
+      albumData: data.albums.items,
+    }
+  | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
+  | FetchAlbumDetailsFulfilled(data) => {
+      ...state,
+      albumDetailsLoading: false,
+      albumDetails: Some(data),
+    }
+  | OpenAlbumDetails => {...state, albumDetailsOpen: true}
+  | CloseAlbumDetails => {...state, albumDetailsOpen: false}
+  | Seek(progress) => {
+      ...state,
+      player: {
+        ...state.player,
+        progress,
+      },
+    }
   };
 
 let initialState = {
-  loading: false,
-  playing: false,
   player: {
     accessToken: "",
     deviceId: "",
     loading: false,
+    playing: false,
+    progress: 0,
+    progressTimer: None,
   },
-  data: {
-    id: "",
-    name: "",
-    artists: [],
-    duration_ms: 0,
-  },
-  progress: 0,
-  progressTimer: Js.Global.setInterval(() => (), 1000000), // fix so we can default to unit
+  currentTrack: None,
   albumDataLoading: false,
   albumData: [],
   albumDetailsLoading: false,
   albumDetailsOpen: false,
-  albumDetails: {
-    name: "",
-    release_date: "",
-    id: "",
-    images: [],
-    artists: [],
-    tracks: {
-      itemss: [],
-    },
-    uri: "",
-  },
+  albumDetails: None,
 };
 
 let storeContext = React.createContext((initialState, _ => ()));
