@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const outputDir = path.join(__dirname, 'build/');
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -12,10 +13,11 @@ module.exports = {
     filename: 'Index.js'
   },
   plugins: [
+    new CompressionPlugin(),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       inject: false
-    })
+    }),
   ],
   devServer: {
     compress: true,

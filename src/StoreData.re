@@ -1,8 +1,52 @@
+type image = {
+  height: int,
+  width: int,
+  url: string,
+};
+
+type track = {
+  name: string,
+  uri: string,
+  duration_ms: int,
+  track_number: int,
+};
+
+type tracksItems = {items: list(track)};
+
+type artist = {name: string};
+
+type albumDetails = {
+  name: string,
+  release_date: string,
+  id: string,
+  images: list(image),
+  artists: list(artist),
+  tracks: tracksItems,
+  uri: string,
+};
+
+type album = {
+  name: string,
+  id: string,
+  images: list(image),
+  artists: list(artist),
+  uri: string,
+};
+
+type albumCondensed = {
+  name: string,
+  uri: string,
+}
+
+type albumsItems = {items: list(album)};
+type albums = {albums: albumsItems};
+
 type currentTrack = {
   id: string,
   name: string,
-  artists: list(AlbumData.artist),
+  artists: list(artist),
   duration_ms: int,
+  album: albumCondensed,
 };
 
 type player = {
@@ -18,10 +62,10 @@ type state = {
   player,
   currentTrack: option(currentTrack),
   albumDataLoading: bool,
-  albumData: list(AlbumData.album),
+  albumData: list(album),
   albumDetailsLoading: bool,
   albumDetailsOpen: bool,
-  albumDetails: option(AlbumData.albumDetails),
+  albumDetails: option(albumDetails),
 };
 
 type trackWindow = {current_track: currentTrack};
@@ -36,11 +80,11 @@ type reducer =
   | Play(Js.Global.intervalId)
   | Pause
   | FetchAlbumsPending
-  | FetchAlbumsFulfilled(AlbumData.albums)
+  | FetchAlbumsFulfilled(albums)
   | OpenAlbumDetails
   | CloseAlbumDetails
   | FetchAlbumDetailsPending
-  | FetchAlbumDetailsFulfilled(AlbumData.albumDetails)
+  | FetchAlbumDetailsFulfilled(albumDetails)
   | IncrementProgress
   | PlayerLoading(string)
   | PlayerReady(string)

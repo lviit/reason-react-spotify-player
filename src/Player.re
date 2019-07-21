@@ -34,7 +34,7 @@ module Styles = {
       justifyContent(`spaceBetween),
     ]);
 
-  let nowPlaying = style([fontSize(px(18)), letterSpacing(px(1))]);
+  let nowPlaying = style([fontSize(px(18)), letterSpacing(px(1)), cursor(`pointer)]);
   let controls = style([display(`flex), alignItems(`center)]);
   let song = style([fontWeight(`num(700))]);
   let progress = style([fontSize(px(18)), letterSpacing(px(1))]);
@@ -53,10 +53,14 @@ let make = () => {
   switch (state.currentTrack) {
   | None => ReasonReact.null
   | Some(currentTrack) =>
-    let {name, duration_ms, artists}: StoreData.currentTrack = currentTrack;
+    let {name, duration_ms, artists, album: {uri}}: StoreData.currentTrack = currentTrack;
     let artist = List.hd(artists).name;
+    let id = String.sub(uri, 14, 22);
+
     <div className=Styles.container>
-      <div className=Styles.nowPlaying>
+      <div
+        className=Styles.nowPlaying
+        onClick={_ => FetchAlbumDetails(id)->dispatch}>
         <span> {ReasonReact.string(artist ++ " - ")} </span>
         <span className=Styles.song> {ReasonReact.string(name)} </span>
         <span className=Styles.progress>

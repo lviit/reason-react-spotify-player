@@ -1,30 +1,29 @@
 open Json.Decode;
 
-let artist = (json): AlbumData.artist => {name: json |> field("name", string)};
+let artist = (json): StoreData.artist => {name: json |> field("name", string)};
 
-let image = (json): AlbumData.image => {
+let image = (json): StoreData.image => {
   height: json |> field("height", int),
   width: json |> field("width", int),
   url: json |> field("url", string),
 };
 
-let track = (json): AlbumData.track => {
+let track = (json): StoreData.track => {
   name: json |> field("name", string),
   uri: json |> field("uri", string),
   duration_ms: json |> field("duration_ms", int),
   track_number: json |> field("track_number", int),
 };
 
-let album = (json): AlbumData.album => {
+let album = (json): StoreData.album => {
   name: json |> field("name", string),
-  release_date: json |> field("release_date", string),
   id: json |> field("id", string),
   images: json |> field("images", list(image)),
   artists: json |> field("artists", list(artist)),
   uri: json |> field("uri", string),
 };
 
-let albumDetails = (json): AlbumData.albumDetails => {
+let albumDetails = (json): StoreData.albumDetails => {
   name: json |> field("name", string),
   release_date: json |> field("release_date", string),
   id: json |> field("id", string),
@@ -34,15 +33,20 @@ let albumDetails = (json): AlbumData.albumDetails => {
   tracks:
     json
     |> field("tracks", (json) =>
-         ({items: json |> field("items", list(track))}: AlbumData.tracksItems)
+         ({items: json |> field("items", list(track))}: StoreData.tracksItems)
        ),
 };
 
-let albums = (json): AlbumData.albums => {
+let albumCondensed = (json): StoreData.albumCondensed => {
+  name: json |> field("name", string),
+  uri: json |> field("uri", string),
+};
+
+let albums = (json): StoreData.albums => {
   albums:
     json
     |> field("albums", (json) =>
-         ({items: json |> field("items", list(album))}: AlbumData.albumsItems)
+         ({items: json |> field("items", list(album))}: StoreData.albumsItems)
        ),
 };
 
@@ -51,6 +55,7 @@ let currentTrack = (json): StoreData.currentTrack => {
   name: json |> field("name", string),
   artists: json |> field("artists", list(artist)),
   duration_ms: json |> field("duration_ms", int),
+  album: json |> field("album", albumCondensed),
 };
 
 let track_window = (json): StoreData.trackWindow => {

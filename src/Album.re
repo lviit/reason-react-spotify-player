@@ -4,7 +4,7 @@ module Styles = {
   open Css;
   open Styles;
 
-  let container = (image: AlbumData.image) =>
+  let container = (image: StoreData.image) =>
     style([
       backgrounds([
         radialGradient([
@@ -38,7 +38,7 @@ module Styles = {
 };
 
 [@react.component]
-let make = (~album as {name, id, images, artists, uri}: AlbumData.album) => {
+let make = (~album as {name, id, images, artists, uri}: StoreData.album) => {
   let (_, dispatch) = React.useContext(storeContext);
   let image = List.hd(images);
   let artist = List.hd(artists);
