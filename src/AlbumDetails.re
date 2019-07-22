@@ -29,22 +29,49 @@ module Styles = {
       hover([cursor(`pointer)]),
       display(`flex),
       justifyContent(`spaceBetween),
+      position(`relative),
     ]);
 
-  let trackNumber = style([marginRight(px(10))]);
+  let trackNumber = style([width(px(35)), flexShrink(0.0)]);
   let trackDuration = style([marginLeft(px(10))]);
   let trackName = style([flexGrow(1.0)]);
   let albumTitle = style([fontSize(px(24)), margin(`zero)]);
   let artistName = style([fontSize(px(18)), marginBottom(px(20))]);
   let image = style([width(`percent(100.0))]);
+
+  let playButton = (hover: bool) =>
+    style([
+      backgroundColor(white),
+      position(`absolute),
+      top(px(7)),
+      transform(translateX(px(hover ? (-20) : (-70)))),
+      transition(~duration=200, ~delay=0, ~timingFunction=`easeInOut, "transform"),
+    ]);
 };
 
 module Track = {
   [@react.component]
-  let make = (~track as {name, uri, track_number, duration_ms}: StoreData.track, ~albumUri) => {
-    let (_, dispatch) = React.useContext(storeContext);
+  let make = (~track as {name, uri, id, track_number, duration_ms}: StoreData.track, ~albumUri) => {
+    let (state, dispatch) = React.useContext(storeContext);
+    let (hover, setHover) = React.useState(() => false);
+    let isPlaying =
+      switch (state.currentTrack) {
+      | None => false
+      | Some(currentTrack) => currentTrack.id === id
+      };
 
-    <span className=Styles.track onClick={_ => PlaySong(uri, albumUri)->dispatch}>
+    <span
+      className=Styles.track
+      onMouseEnter={_ => setHover(_ => true)}
+      onMouseLeave={_ => setHover(_ => false)}
+      onClick={_ => PlaySong(uri, albumUri)->dispatch}>
+      {isPlaying
+         ? <span className={Styles.playButton(true)}>
+             <Button icon=Button.Volume color=Button.Dark action={_ => ()} />
+           </span>
+         : <span className={Styles.playButton(hover)}>
+             <Button icon=Button.Play color=Button.Dark action={_ => ()} />
+           </span>}
       <span className=Styles.trackNumber>
         {ReasonReact.string(track_number->string_of_int ++ ".")}
       </span>

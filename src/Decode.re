@@ -11,6 +11,7 @@ let image = (json): StoreData.image => {
 let track = (json): StoreData.track => {
   name: json |> field("name", string),
   uri: json |> field("uri", string),
+    id: json |> field("id", string),
   duration_ms: json |> field("duration_ms", int),
   track_number: json |> field("track_number", int),
 };

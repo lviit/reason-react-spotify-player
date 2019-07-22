@@ -7,6 +7,7 @@ type image = {
 type track = {
   name: string,
   uri: string,
+  id: string,
   duration_ms: int,
   track_number: int,
 };
