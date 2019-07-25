@@ -4,26 +4,6 @@ open Utils;
 module Styles = {
   open Css;
 
-  let progressBar =
-    style([
-      width(px(200)),
-      unsafe("-webkit-appearance", "none"),
-      backgroundColor(hex("fff")),
-      height(px(4)),
-      borderRadius(px(2)),
-      focus([outlineStyle(`none)]),
-      selector(
-        "::-webkit-slider-thumb",
-        [
-          unsafe("-webkit-appearance", "none"),
-          backgroundColor(hex("fff")),
-          height(px(16)),
-          width(px(16)),
-          borderRadius(px(8)),
-        ],
-      ),
-    ]);
-
   let container =
     style([
       fontSize(px(20)),
@@ -62,6 +42,12 @@ module Styles = {
     style([
       position(`absolute),
       transform(translateY(`percent(Belt.Option.isSome(currentTrack) ? 0.0 : (-100.0)))),
+      transition(
+        ~duration=500,
+        ~delay=0,
+        ~timingFunction=cubicBesier(0.15, 1.0, 0.33, 1.0),
+        "transform",
+      ),
     ]);
 
   let nowPlaying =
@@ -76,7 +62,30 @@ module Styles = {
       lineHeight(px(50)),
       flexGrow(1.0),
     ]);
-  let controls = style([display(`flex), alignItems(`center)]);
+
+  let progress = style([margin2(~v=`zero, ~h=px(10))]);
+  let progressBar =
+    style([
+      width(px(200)),
+      margin2(~v=`zero, ~h=px(10)),
+      unsafe("-webkit-appearance", "none"),
+      backgroundColor(hex("fff")),
+      height(px(4)),
+      borderRadius(px(2)),
+      focus([outlineStyle(`none)]),
+      selector(
+        "::-webkit-slider-thumb",
+        [
+          unsafe("-webkit-appearance", "none"),
+          backgroundColor(hex("fff")),
+          height(px(16)),
+          width(px(16)),
+          borderRadius(px(8)),
+        ],
+      ),
+    ]);
+
+  let controls = style([display(`flex), alignItems(`center), margin2(~v=`zero, ~h=px(10))]);
   let song = style([fontWeight(`num(700))]);
   let right = style([display(`flex)]);
 };
@@ -121,6 +130,7 @@ let make = () => {
     </div>
     <div className=Styles.right>
       <div className=Styles.controls>
+        <span className=Styles.progress> {progress->formatDuration->ReasonReact.string} </span>
         <input
           className=Styles.progressBar
           type_="range"
@@ -130,13 +140,12 @@ let make = () => {
           value={progress->string_of_int}
           onChange=handleProgressChange
         />
-        <span> {progress->formatDuration->ReasonReact.string} </span>
-        <Button icon=Button.Prev action={_ => dispatch(Prev)} />
+        <Button icon=Button.Prev action={_ => dispatch(Prev)} size="32" />
         <Button
           icon={playing ? Button.Pause : Button.Play}
           action={_ => dispatch(playing ? Pause : Play)}
         />
-        <Button icon=Button.Next action={_ => dispatch(Next)} />
+        <Button icon=Button.Next action={_ => dispatch(Next)} size="32" />
       </div>
       <Visualizer />
     </div>

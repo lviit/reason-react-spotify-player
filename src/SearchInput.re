@@ -11,6 +11,7 @@ module Styles = {
       fontSize(px(20)),
       backgroundColor(hex("ddd")),
       borderStyle(`none),
+      placeholder([fontStyle(`italic)]),
     ]);
 };
 

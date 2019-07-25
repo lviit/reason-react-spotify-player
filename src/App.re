@@ -7,6 +7,8 @@ module Styles = {
     style([
       padding3(~top=px(115), ~h=px(20), ~bottom=px(20)),
       filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
+      maxWidth(px(1440)),
+      margin2(~v=`zero, ~h=`auto),
     ]);
 
   let overlay =

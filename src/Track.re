@@ -19,12 +19,12 @@ module Styles = {
   let trackDuration = style([marginLeft(px(10))]);
   let trackName = style([flexGrow(1.0)]);
 
-  let playButton = (hover: bool) =>
+  let playButton = (isPlaying: bool, hover: bool) =>
     style([
       backgroundColor(white),
       position(`absolute),
-      top(px(7)),
-      transform(translateX(px(hover ? (-20) : (-70)))),
+      top(px(isPlaying ? 14 : 10)),
+      transform(translateX(px(isPlaying ? (-12) : hover ? (-17) : (-70)))),
       transition(~duration=200, ~delay=0, ~timingFunction=`easeInOut, "transform"),
     ]);
 };
@@ -44,8 +44,10 @@ let make = (~track as {name, uri, id, track_number, duration_ms}: StoreData.trac
     onMouseEnter={_ => setHover(_ => true)}
     onMouseLeave={_ => setHover(_ => false)}
     onClick={_ => PlaySong(uri, albumUri)->dispatch}>
-    <span className={Styles.playButton(isPlaying ? true : hover)}>
-      <Button icon={isPlaying ? Button.Volume : Button.Play} color=Button.Dark action={_ => ()} />
+    <span className={Styles.playButton(isPlaying, hover)}>
+      {isPlaying
+         ? <Button icon=Button.Volume color=Button.Dark action={_ => ()} size="24" />
+         : <Button icon=Button.Play color=Button.Dark action={_ => ()} size="32" />}
     </span>
     <span className=Styles.trackNumber>
       {ReasonReact.string(track_number->string_of_int ++ ".")}
