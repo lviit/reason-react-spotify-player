@@ -36,23 +36,27 @@ module Main = {
   [@react.component]
   let make = () => {
     let (state, dispatch) = React.useContext(storeContext);
+    let {albumDetailsOpen, player: {deviceId, loading}}: StoreData.state = state;
 
     React.useEffect1(
       () => {
-        dispatch(LoadPlayer);
-        Some(() => ());
+        LoadPlayer->dispatch;
+        None;
       },
       [||],
     );
 
     <React.Fragment>
       <Header />
-      {state.albumDetailsOpen
+      {albumDetailsOpen
          ? <div className=Styles.overlay onClick={_ => CloseAlbumDetails->dispatch} />
          : ReasonReact.null}
       <AlbumDetails />
-      <div className={Styles.main(state.albumDetailsOpen)}>
-        {state.player.loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>}
+      <div className={Styles.main(albumDetailsOpen)}>
+        {switch (deviceId->String.length) {
+         | 0 => loading ? <LoadingSpinner /> : <LoginButton />
+         | _ => loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>
+         }}
       </div>
     </React.Fragment>;
   };

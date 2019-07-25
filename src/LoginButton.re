@@ -5,18 +5,17 @@ module Styles = {
 
   let button =
     style([
-      padding2(~v=px(5), ~h=px(20)),
-      fontSize(16 |> px),
+      padding2(~v=px(10), ~h=px(10)),
+      margin2(~v=`zero, ~h=`auto),
+      fontSize(px(20)),
       backgroundColor(hex("B03D32")),
       letterSpacing(px(1)),
       color(white),
       textDecoration(none),
-      textAlign(center),
       display(`flex),
-      alignItems(`center),
+      justifyContent(`center),
       fontWeight(`num(600)),
-      hover([backgroundColor(hex("fff")), color(hex("DB4D3F"))]),
-      //backgroundColor(hex("DB4D3F")),
+      maxWidth(px(200)),
     ]);
 };
 
@@ -46,6 +45,6 @@ let make = () => {
       ++ join("%20", scopes)
       ++ "&response_type=token&show_dialog=true"
     }>
-    {ReasonReact.string("Login to Spotify")}
+    {ReasonReact.string("Authenticate")}
   </a>;
 };
