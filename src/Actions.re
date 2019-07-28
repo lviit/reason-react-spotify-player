@@ -44,14 +44,12 @@ let action = (dispatch, state, actionType: actionType) => {
     |> ignore;
   | FetchAlbumDetails(id) =>
     OpenAlbumDetails->dispatch;
-    Element.bodyStyle(Element.document, "overflow: hidden;");
     FetchAlbumDetailsPending->dispatch;
     request(AlbumDetails(id), accessToken)
     |> then_(Fetch.Response.json)
     |> then_(json => json->Decode.albumDetails->FetchAlbumDetailsFulfilled->dispatch->resolve)
     |> ignore;
   | CloseAlbumDetails =>
-    Element.bodyStyle(Element.document, "");
     CloseAlbumDetails->dispatch;
   | Seek(progress) =>
     request(progress->Seek, accessToken)

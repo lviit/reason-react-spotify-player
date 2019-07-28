@@ -9,6 +9,10 @@ module Styles = {
       filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
       maxWidth(px(1440)),
       margin2(~v=`zero, ~h=`auto),
+      overflow(albumDetailsOpen ? `hidden : `auto),
+      height(`calc((`sub, vh(100.0), px(95)))),
+      unsafe("-webkit-overflow-scrolling", "touch"),
+      ...Styles.scrollBar,
     ]);
 
   let overlay =
@@ -31,7 +35,6 @@ module Styles = {
       margin(px(0)),
       backgroundColor(hex("F6F4F4")),
       color(hex("24292e")),
-      ...Styles.scrollBar
     ],
   );
 };
