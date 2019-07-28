@@ -21,6 +21,7 @@ module Styles = {
       overflow(`auto),
       width(px(400)),
       backgroundColor(hex("fff")),
+      ...Styles.scrollBar,
     ]);
 
   let infoContainer =

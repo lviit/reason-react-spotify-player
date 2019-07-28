@@ -39,7 +39,7 @@ type albumCondensed = {
   uri: string,
 }
 
-type albumsItems = {items: list(album)};
+type albumsItems = {items: list(album), total: int};
 type albums = {albums: albumsItems};
 
 type currentTrack = {
@@ -63,7 +63,7 @@ type state = {
   player,
   currentTrack: option(currentTrack),
   albumDataLoading: bool,
-  albumData: list(album),
+  albumData: albumsItems,
   albumDetailsLoading: bool,
   albumDetailsOpen: bool,
   albumDetails: option(albumDetails),

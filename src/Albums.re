@@ -3,15 +3,6 @@ open StoreProvider;
 module Styles = {
   open Css;
 
-  let title =
-    style([
-      fontSize(px(60)),
-      margin(px(50)),
-      fontWeight(`num(700)),
-      letterSpacing(px(1)),
-      textAlign(`center),
-    ]);
-
   let container =
     style([
       display(`grid),
@@ -26,7 +17,7 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
-  let {albumData, albumDataLoading, player: {deviceId}}: StoreData.state = state;
+  let {albumData: {items}, albumDataLoading, player: {deviceId}}: StoreData.state = state;
 
   React.useEffect1(
     () => {
@@ -40,10 +31,9 @@ let make = () => {
   );
 
   <div>
-    <h1 className=Styles.title> {ReasonReact.string("Results")} </h1>
-    {albumDataLoading && albumData->List.length > 0 ? <LoadingSpinner /> : ReasonReact.null}
+    {albumDataLoading && items->List.length > 0 ? <LoadingSpinner /> : ReasonReact.null}
     <div className=Styles.container>
-      {List.map(album => <Album album key={album.id} />, albumData)
+      {List.map(album => <Album album key={album.id} />, items)
        |> Array.of_list
        |> ReasonReact.array}
     </div>

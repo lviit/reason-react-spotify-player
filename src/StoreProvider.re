@@ -54,7 +54,10 @@ let reducer = (state, reducer: StoreData.reducer) =>
   | FetchAlbumsFulfilled(data) => {
       ...state,
       albumDataLoading: false,
-      albumData: data.albums.items,
+      albumData: {
+        items: data.albums.items,
+        total: data.albums.total,
+      },
     }
   | FetchAlbumDetailsPending => {...state, albumDetailsLoading: true}
   | FetchAlbumDetailsFulfilled(data) => {
@@ -84,7 +87,10 @@ let initialState = {
   },
   currentTrack: None,
   albumDataLoading: false,
-  albumData: [],
+  albumData: {
+    items: [],
+    total: 0,
+  },
   albumDetailsLoading: false,
   albumDetailsOpen: false,
   albumDetails: None,

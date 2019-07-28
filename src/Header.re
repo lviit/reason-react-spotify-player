@@ -15,20 +15,16 @@ module Styles = {
       display(`flex),
       justifyContent(`spaceBetween),
       alignItems(`center),
-      boxSizing(`borderBox),
       boxShadow(~x=px(0), ~y=px(2), ~blur=px(4), rgba(12, 38, 69, 0.3)),
     ]);
 
   let title = currentTrack =>
     style([
+      fontSize(px(20)),
       position(`absolute),
-      fontSize(20 |> px),
       textTransform(`uppercase),
-      color(white),
       margin(px(0)),
       marginLeft(px(5)),
-      fontWeight(`num(700)),
-      letterSpacing(px(2)),
       transform(translateY(`percent(Belt.Option.isSome(currentTrack) ? 100.0 : 0.0))),
       transition(
         ~duration=500,
@@ -52,7 +48,6 @@ module Styles = {
 
   let nowPlaying =
     style([
-      letterSpacing(px(1)),
       paddingLeft(px(10)),
       cursor(`pointer),
       position(`relative),

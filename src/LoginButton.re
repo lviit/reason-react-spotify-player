@@ -9,7 +9,6 @@ module Styles = {
       margin2(~v=`zero, ~h=`auto),
       fontSize(px(20)),
       backgroundColor(hex("B03D32")),
-      letterSpacing(px(1)),
       color(white),
       textDecoration(none),
       display(`flex),

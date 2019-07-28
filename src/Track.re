@@ -7,7 +7,6 @@ module Styles = {
   let track =
     style([
       padding2(~v=px(15), ~h=px(0)),
-      letterSpacing(px(1)),
       borderTop(px(2), `solid, hex("eee")),
       hover([cursor(`pointer)]),
       display(`flex),

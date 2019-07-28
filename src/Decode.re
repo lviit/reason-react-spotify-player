@@ -11,7 +11,7 @@ let image = (json): StoreData.image => {
 let track = (json): StoreData.track => {
   name: json |> field("name", string),
   uri: json |> field("uri", string),
-    id: json |> field("id", string),
+  id: json |> field("id", string),
   duration_ms: json |> field("duration_ms", int),
   track_number: json |> field("track_number", int),
 };
@@ -47,7 +47,9 @@ let albums = (json): StoreData.albums => {
   albums:
     json
     |> field("albums", (json) =>
-         ({items: json |> field("items", list(album))}: StoreData.albumsItems)
+         (
+           {items: json |> field("items", list(album)), total: json |> field("total", int)}: StoreData.albumsItems
+         )
        ),
 };
 

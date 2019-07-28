@@ -5,7 +5,7 @@ module Styles = {
 
   let main = albumDetailsOpen =>
     style([
-      padding3(~top=px(115), ~h=px(20), ~bottom=px(20)),
+      padding3(~top=px(75), ~h=px(20), ~bottom=px(20)),
       filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
       maxWidth(px(1440)),
       margin2(~v=`zero, ~h=`auto),
@@ -27,9 +27,11 @@ module Styles = {
     "body",
     [
       fontFamily("IBM Plex Sans"),
+      letterSpacing(pxFloat(0.5)),
       margin(px(0)),
       backgroundColor(hex("F6F4F4")),
       color(hex("24292e")),
+      ...Styles.scrollBar
     ],
   );
 };

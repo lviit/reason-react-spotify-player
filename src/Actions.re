@@ -34,15 +34,13 @@ let action = (dispatch, state, actionType: actionType) => {
     FetchAlbumsPending->dispatch;
     request(NewReleases, accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->Decode.albums->resolve)
-    |> then_(data => data->FetchAlbumsFulfilled->dispatch->resolve)
+    |> then_(json => json->Decode.albums->FetchAlbumsFulfilled->dispatch->resolve)
     |> ignore;
   | Search(keywords) =>
     FetchAlbumsPending->dispatch;
     request(keywords->Search, accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->Decode.albums->resolve)
-    |> then_(data => data->FetchAlbumsFulfilled->dispatch->resolve)
+    |> then_(json => json->Decode.albums->FetchAlbumsFulfilled->dispatch->resolve)
     |> ignore;
   | FetchAlbumDetails(id) =>
     OpenAlbumDetails->dispatch;
@@ -50,8 +48,7 @@ let action = (dispatch, state, actionType: actionType) => {
     FetchAlbumDetailsPending->dispatch;
     request(AlbumDetails(id), accessToken)
     |> then_(Fetch.Response.json)
-    |> then_(json => json->Decode.albumDetails->resolve)
-    |> then_(data => data->FetchAlbumDetailsFulfilled->dispatch->resolve)
+    |> then_(json => json->Decode.albumDetails->FetchAlbumDetailsFulfilled->dispatch->resolve)
     |> ignore;
   | CloseAlbumDetails =>
     Element.bodyStyle(Element.document, "");
@@ -61,12 +58,24 @@ let action = (dispatch, state, actionType: actionType) => {
     |> then_(_ => progress->Seek->dispatch->resolve)
     |> ignore
   | LoadPlayer =>
-    let accessToken =
+    let fromHash =
       window->Location.getHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
-    switch (accessToken) {
+    let accessToken =
+      switch (fromHash) {
+      | None => LocalStorage.getItem(LocalStorage.localStorage, "accessToken");
+      | Some(accessToken) => Some(accessToken)
+      };
+
+    Js.log(accessToken);
+    let faa = LocalStorage.getItem(LocalStorage.localStorage, "accessToken");
+    Js.log(faa);
+
+    switch (faa) {
     | None => Js.log("No access token available")
     | Some(accessToken) =>
+      Js.log(faa);
       Location.setHash(window, "");
+      LocalStorage.setItem(LocalStorage.localStorage, "accessToken", accessToken);
       PlayerLoading(accessToken) |> dispatch;
       Spotify.(
         onSpotifyWebPlaybackSDKReady(

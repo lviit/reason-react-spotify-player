@@ -11,6 +11,7 @@
     "server": "webpack-dev-server"
   },
   "keywords": [
+    "Reason",
     "BuckleScript"
   ],
   "author": "",
