@@ -58,50 +58,65 @@ let action = (dispatch, state, actionType: actionType) => {
     |> then_(_ => progress->Seek->dispatch->resolve)
     |> ignore
   | LoadPlayer =>
-    let fromHash =
-      window->Location.getHash->URLSearchParams.make |> URLSearchParams.get("#access_token");
+    let params = window->Location.getHash->URLSearchParams.make;
     let accessToken =
-      switch (fromHash) {
-      | None => LocalStorage.getItem(LocalStorage.localStorage, "accessToken");
+      switch (URLSearchParams.get("#access_token", params)) {
+      | None => Dom.Storage.getItem("accessToken", Dom.Storage.localStorage)
       | Some(accessToken) => Some(accessToken)
       };
 
-    Js.log(accessToken);
-    let faa = LocalStorage.getItem(LocalStorage.localStorage, "accessToken");
-    Js.log(faa);
+    let expireDate =
+      switch (URLSearchParams.get("expires_in", params)) {
+      | None =>
+        switch (Dom.Storage.getItem("expireDate", Dom.Storage.localStorage)) {
+        | None => 0.0
+        | Some(expireDate) => expireDate->float_of_string
+        }
+      | Some(expireDate) => Js.Date.now() +. expireDate->float_of_string *. 1000.0
+      };
 
-    switch (faa) {
+    switch (accessToken) {
     | None => Js.log("No access token available")
     | Some(accessToken) =>
-      Js.log(faa);
-      Location.setHash(window, "");
-      LocalStorage.setItem(LocalStorage.localStorage, "accessToken", accessToken);
-      PlayerLoading(accessToken) |> dispatch;
-      Spotify.(
-        onSpotifyWebPlaybackSDKReady(
-          window,
-          () => {
-            let settings =
-              settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
-            let player = createSpotifyPlayer(settings);
-            player |> addListener("initialization_error", state => state->messageGet->Js.log);
-            player |> addListener("authentication_error", state => state->messageGet->Js.log);
-            player |> addListener("account_error", state => state->messageGet->Js.log);
-            player |> addListener("playback_error", state => state->messageGet->Js.log);
-            player
-            |> addStateListener("player_state_changed", state =>
-                 state->Decode.playerState->PlayerStateChange->dispatch
-               );
-            player |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
-            player |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
-            player |> connect() |> ignore;
-          },
-        )
-      );
+      Js.Date.now() > expireDate
+        ? Js.log("access token expired")
+        : {
+          Dom.Storage.setItem("accessToken", accessToken, Dom.Storage.localStorage);
+          Dom.Storage.setItem(
+            "expireDate",
+            expireDate->Js.Float.toString,
+            Dom.Storage.localStorage,
+          );
+          Location.setHash(window, "");
+          PlayerLoading(accessToken) |> dispatch;
+          Spotify.(
+            onSpotifyWebPlaybackSDKReady(
+              window,
+              () => {
+                let settings =
+                  settings(~name="Reason client test", ~getOAuthToken=cb => cb(accessToken));
+                let player = createSpotifyPlayer(settings);
+                player |> addListener("initialization_error", state => state->messageGet->Js.log);
+                player |> addListener("authentication_error", state => state->messageGet->Js.log);
+                player |> addListener("account_error", state => state->messageGet->Js.log);
+                player |> addListener("playback_error", state => state->messageGet->Js.log);
+                player
+                |> addStateListener("player_state_changed", state =>
+                     state->Decode.playerState->PlayerStateChange->dispatch
+                   );
+                player
+                |> addListener("ready", state => PlayerReady(state->device_idGet)->dispatch);
+                player
+                |> addListener("not_ready", state => state->device_idGet->Js.log2("not ready"));
+                player |> connect() |> ignore;
+              },
+            )
+          );
 
-      let scriptTag = Element.createElement(Element.document, "script");
-      Element.setSrc(scriptTag, "https://sdk.scdn.co/spotify-player.js");
-      Element.appendToHead(Element.document, scriptTag);
+          let scriptTag = Element.createElement(Element.document, "script");
+          Element.setSrc(scriptTag, "https://sdk.scdn.co/spotify-player.js");
+          Element.appendToHead(Element.document, scriptTag);
+        }
     };
   };
 };

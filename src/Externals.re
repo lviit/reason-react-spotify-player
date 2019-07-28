@@ -19,8 +19,7 @@ module Element = {
   [@bs.set] external setSrc: (Dom.element, string) => unit = "src";
   [@bs.send] [@bs.scope "head"]
   external appendToHead: (document, Dom.element) => unit = "appendChild";
-  [@bs.set] [@bs.scope "body"]
-  external bodyStyle: (document, string) => unit = "style";
+  [@bs.set] [@bs.scope "body"] external bodyStyle: (document, string) => unit = "style";
 };
 
 module Spotify = {
