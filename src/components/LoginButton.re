@@ -22,7 +22,7 @@ module Styles = {
 let make = () => {
   let authEndpoint = "https://accounts.spotify.com/authorize";
   let clientId = "64d03692241b478cb763ec2a7eed99e0";
-  let redirectUri = "http://localhost:8000";
+  let redirectUri = "https://lviit.github.io/reason-react-spotify-player/build";
   let scopes = [
     "user-read-currently-playing",
     "user-read-playback-state",
