@@ -8,7 +8,8 @@ module Styles = {
 let make = () => {
   React.useEffect1(
     () => {
-      // TODO: handle with proper bindings
+      // TODO: Remove as this currently uses the microphone and because of encrypted
+      // media extensions we can't access the proper audio stream with web audio api
       %bs.raw
       {|
         (function init() {
