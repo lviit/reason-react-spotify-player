@@ -1,1 +1,1 @@
-ReactDOMRe.renderToElementWithId(<App />, "index");
+ReactDOMRe.renderToElementWithId(<StoreProvider> <App /> </StoreProvider>, "index");

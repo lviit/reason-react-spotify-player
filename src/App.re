@@ -39,37 +39,30 @@ module Styles = {
   );
 };
 
-module Main = {
-  [@react.component]
-  let make = () => {
-    let (state, dispatch) = React.useContext(storeContext);
-    let {albumDetailsOpen, player: {deviceId, loading}}: StoreData.state = state;
-
-    React.useEffect1(
-      () => {
-        LoadPlayer->dispatch;
-        None;
-      },
-      [||],
-    );
-
-    <React.Fragment>
-      <Header />
-      {albumDetailsOpen
-         ? <div className=Styles.overlay onClick={_ => CloseAlbumDetails->dispatch} />
-         : ReasonReact.null}
-      <AlbumDetails />
-      <div className={Styles.main(albumDetailsOpen)}>
-        {switch (deviceId->String.length) {
-         | 0 => loading ? <LoadingSpinner /> : <LoginButton />
-         | _ => loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>
-         }}
-      </div>
-    </React.Fragment>;
-  };
-};
-
 [@react.component]
 let make = () => {
-  <StoreProvider> <Main /> </StoreProvider>;
+  let (state, dispatch) = React.useContext(storeContext);
+  let {albumDetailsOpen, player: {deviceId, loading}}: StoreData.state = state;
+
+  React.useEffect1(
+    () => {
+      LoadPlayer->dispatch;
+      None;
+    },
+    [||],
+  );
+
+  <React.Fragment>
+    <Header />
+    {albumDetailsOpen
+       ? <div className=Styles.overlay onClick={_ => CloseAlbumDetails->dispatch} />
+       : ReasonReact.null}
+    <AlbumDetails />
+    <div className={Styles.main(albumDetailsOpen)}>
+      {switch (deviceId->String.length) {
+       | 0 => loading ? <LoadingSpinner /> : <LoginButton />
+       | _ => loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>
+       }}
+    </div>
+  </React.Fragment>;
 };

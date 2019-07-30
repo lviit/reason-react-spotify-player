@@ -56,7 +56,7 @@ module Styles = {
 };
 
 [@react.component]
-let make = (~album as {name, id, images, artists, uri}: StoreData.album) => {
+let make = (~album as {name, id, images, artists}: StoreData.album) => {
   let (_, dispatch) = React.useContext(storeContext);
   let image = List.hd(images);
   let artist = List.hd(artists);
