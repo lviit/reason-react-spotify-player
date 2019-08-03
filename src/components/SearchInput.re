@@ -6,23 +6,27 @@ module Styles = {
   let container =
     style([
       position(`relative),
-      padding(px(20)),
       display(`flex),
-      flexDirection(`column),
       backgroundColor(hex("8c3028")),
       color(hex("fff")),
-      justifyContent(`center),
       overflow(`hidden),
-      backgrounds([
+    ]);
+
+  let infoContainer =
+    style([
+      zIndex(1),
+      display(`flex),
+      justifyContent(`center),
+      flexDirection(`column),
+      flexGrow(1.0),
+      padding(px(20)),
+      background(
         radialGradient([
           (`percent(0.0), rgba(0, 0, 0, 0.0)),
           (`percent(100.0), rgba(0, 0, 0, 0.5)),
         ]),
-        hex("8c3028"),
-      ]),
+      ),
     ]);
-
-  let infoContainer = style([zIndex(1), display(`flex), flexDirection(`column)]);
 
   let title = style([fontWeight(`num(600)), fontSize(px(32))]);
 
@@ -67,6 +71,8 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
+  let (bgItem, setBgItem) = React.useState(() => None);
+  let {albumData: {items, total}}: StoreData.state = state;
 
   let handleSubmit = e => {
     ReactEvent.Form.preventDefault(e);
@@ -74,11 +80,18 @@ let make = () => {
     Search(keywords)->dispatch;
   };
 
-  let bgItem =
-    switch (List.length(state.albumData.items)) {
-    | 0 => None
-    | length => Some(List.nth(state.albumData.items, Random.int(length)).images->List.hd)
-    };
+  React.useEffect1(
+    () => {
+      let item =
+        switch (List.length(items)) {
+        | 0 => None
+        | length => Some(List.nth(items, Random.int(length)).images->List.hd)
+        };
+      setBgItem(_ => item);
+      None;
+    },
+    [|items|],
+  );
 
   <form className=Styles.container onSubmit=handleSubmit>
     {switch (bgItem) {
@@ -89,7 +102,7 @@ let make = () => {
       <span className=Styles.title> {ReasonReact.string("Search")} </span>
       <input name="keywords" placeholder="album title" className=Styles.input />
       <span className=Styles.resultCount>
-        {ReasonReact.string(state.albumData.total->string_of_int ++ " results")}
+        {ReasonReact.string(total->string_of_int ++ " results")}
       </span>
     </div>
   </form>;

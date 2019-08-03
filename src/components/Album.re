@@ -7,7 +7,9 @@ module Styles = {
   let container =
     style([
       backgrounds([]),
-      hover([selector("img", [transform(`scale((1.15, 1.15)))])]),
+      hover([
+        selector("img", [transform(`scale((1.10, 1.10))), filter([`saturate(100.0)])]),
+      ]),
       backgroundPosition(`percent(50.0), `percent(50.0)),
       color(colorFontLight |> hex),
       position(`relative),
@@ -18,11 +20,12 @@ module Styles = {
   let image =
     style([
       width(`percent(100.0)),
+      filter([`saturate(50.0)]),
       transition(
         ~duration=500,
         ~delay=0,
         ~timingFunction=cubicBesier(0.15, 1.0, 0.33, 1.0),
-        "transform",
+        "all",
       ),
     ]);
 

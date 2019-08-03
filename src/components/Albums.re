@@ -23,7 +23,7 @@ let make = () => {
       | 0 => ()
       | _ => dispatch(FetchNewReleases)
       };
-      Some(() => ());
+      None;
     },
     [|deviceId|],
   );
