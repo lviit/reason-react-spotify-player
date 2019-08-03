@@ -6,10 +6,7 @@ module Styles = {
   let container =
     style([
       display(`grid),
-      gridAutoRows(px(300)),
-      gridTemplateColumns([`percent(25.0), `percent(25.0), `percent(25.0), `percent(25.0)]),
-      //gridTemplateColumns(repeat(12, minmax(px(100), fr(1)))),
-      //grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gridTemplateColumns([`repeat((`autoFill, `minmax((px(250), fr(1.0)))))]),
       gridGap(px(3)),
     ]);
 };
@@ -18,6 +15,7 @@ module Styles = {
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
   let {albumData: {items}, albumDataLoading, player: {deviceId}}: StoreData.state = state;
+  let tiles = [<SearchInput />, ...List.map(album => <Album album key={album.id} />, items)];
 
   React.useEffect1(
     () => {
@@ -32,10 +30,6 @@ let make = () => {
 
   <div>
     {albumDataLoading && items->List.length > 0 ? <LoadingSpinner /> : ReasonReact.null}
-    <div className=Styles.container>
-      {List.map(album => <Album album key={album.id} />, items)
-       |> Array.of_list
-       |> ReasonReact.array}
-    </div>
+    <div className=Styles.container> {tiles |> Array.of_list |> ReasonReact.array} </div>
   </div>;
 };

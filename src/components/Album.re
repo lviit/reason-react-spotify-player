@@ -26,7 +26,16 @@ module Styles = {
       ),
     ]);
 
-  let title = style([marginTop(0 |> px), marginBottom(10 |> px), fontSize(24 |> px)]);
+  let title =
+    style([
+      marginTop(0 |> px),
+      marginBottom(5 |> px),
+      fontSize(22 |> px),
+      fontWeight(`num(600)),
+      whiteSpace(`nowrap),
+      overflow(`hidden),
+      textOverflow(`ellipsis),
+    ]);
 
   let info =
     style([
@@ -42,14 +51,11 @@ module Styles = {
       backgrounds([
         radialGradient([
           (`percent(50.0), rgba(0, 0, 0, 0.0)),
-          (`percent(100.0), rgba(0, 0, 0, 0.3)),
+          (`percent(100.0), rgba(0, 0, 0, 0.4)),
         ]),
         linearGradient(
           deg(0.0),
-          [
-            (`percent(0.0), rgba(0, 0, 0, 1.0)),
-            (`percent(50.0), rgba(0, 0, 0, 0.0)),
-          ],
+          [(`percent(0.0), rgba(0, 0, 0, 0.8)), (`percent(50.0), rgba(0, 0, 0, 0.0))],
         ),
       ]),
     ]);

@@ -5,12 +5,11 @@ module Styles = {
 
   let main = albumDetailsOpen =>
     style([
-      padding3(~top=px(75), ~h=px(20), ~bottom=px(20)),
+      paddingTop(px(50)),
       filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
-      maxWidth(px(1440)),
       margin2(~v=`zero, ~h=`auto),
       overflow(albumDetailsOpen ? `hidden : `auto),
-      height(`calc((`sub, vh(100.0), px(95)))),
+      height(`calc((`sub, vh(100.0), px(50)))),
       unsafe("-webkit-overflow-scrolling", "touch"),
       ...Styles.scrollBar,
     ]);
@@ -61,7 +60,7 @@ let make = () => {
     <div className={Styles.main(albumDetailsOpen)}>
       {switch (deviceId->String.length) {
        | 0 => loading ? <LoadingSpinner /> : <LoginButton />
-       | _ => loading ? <LoadingSpinner /> : <div> <SearchInput /> <Albums /> </div>
+       | _ => loading ? <LoadingSpinner /> :  <Albums />
        }}
     </div>
   </React.Fragment>;

@@ -46,7 +46,6 @@ let make = () => {
     };
 
   <div className=Styles.controls>
-    <span className=Styles.progress> {progress->formatDuration->ReasonReact.string} </span>
     <input
       className=Styles.progressBar
       type_="range"
@@ -56,6 +55,7 @@ let make = () => {
       value={progress->string_of_int}
       onChange=handleProgressChange
     />
+    <span className=Styles.progress> {progress->formatDuration->ReasonReact.string} </span>
     <Button icon=Button.Prev action={_ => dispatch(Prev)} size="32" />
     <Button
       icon={playing ? Button.Pause : Button.Play}
