@@ -37,7 +37,7 @@
 /* eslint-disable indent, no-unused-vars, no-multiple-empty-lines, max-nested-callbacks, space-before-function-paren, quotes, comma-spacing */
 'use strict';
 
-var precacheConfig = [["Index.js","77f5c24a3f642fd951ed283c340dad10"],["Index.js.gz","65e109093880dd9ae87dae90b65d8e42"],["icon_192x192.png","984103f4a75a3c1e1693001170bdff9b"],["icon_512x512.png","b8b27cac43c0cf28d6bd6c071596ef64"],["index.html","8f895708537ec6a9a8f41be305c811b5"],["manifest.json","0dfe9b2c7455866b9664c34d461bfcc9"]];
+var precacheConfig = [["Index.js","102ef1cdac298698a276a28f3a33495c"],["Index.js.gz","5af9b4e109159706a2ac728e3b681b19"],["icon_192x192.png","984103f4a75a3c1e1693001170bdff9b"],["icon_512x512.png","b8b27cac43c0cf28d6bd6c071596ef64"],["index.html","8f895708537ec6a9a8f41be305c811b5"],["manifest.json","0dfe9b2c7455866b9664c34d461bfcc9"]];
 var cacheName = 'sw-precache-v3-reason-react-spotify-player-' + (self.registration ? self.registration.scope : '');
 
 
