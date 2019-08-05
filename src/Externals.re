@@ -1,6 +1,9 @@
 type win;
 [@bs.val] external window: win = "";
 
+type navigator;
+[@bs.val] external navigator: navigator = "";
+
 module URLSearchParams = {
   type t;
   [@bs.new] external make: string => t = "URLSearchParams";
@@ -10,6 +13,10 @@ module URLSearchParams = {
 module Location = {
   [@bs.set] [@bs.scope "location"] external setHash: (win, string) => unit = "hash";
   [@bs.get] [@bs.scope "location"] external getHash: win => string = "hash";
+};
+
+module ServiceWorker = {
+  [@bs.send] [@bs.scope "serviceWorker"] external register: (navigator, string) => unit = "";
 };
 
 module Element = {

@@ -56,6 +56,7 @@ let action = (dispatch, state, actionType: actionType) => {
     |> then_(_ => progress->Seek->dispatch->resolve)
     |> ignore
   | LoadPlayer =>
+    ServiceWorker.register(navigator, "/service-worker.js");
     let params = window->Location.getHash->URLSearchParams.make;
     let accessToken =
       switch (URLSearchParams.get("#access_token", params)) {
