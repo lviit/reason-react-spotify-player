@@ -6,6 +6,7 @@ module Styles = {
   let main = albumDetailsOpen =>
     style([
       paddingTop(px(50)),
+      position(`relative),
       filter([`blur(px(albumDetailsOpen ? 10 : 0))]),
       margin2(~v=`zero, ~h=`auto),
       overflow(albumDetailsOpen ? `hidden : `auto),
@@ -32,16 +33,18 @@ module Styles = {
       fontFamily("IBM Plex Sans"),
       letterSpacing(pxFloat(0.5)),
       margin(px(0)),
-      backgroundColor(hex("F6F4F4")),
+      backgroundColor(hex("000")),
       color(hex("24292e")),
     ],
   );
+
+  global("input", [letterSpacing(pxFloat(0.5))]);
 };
 
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
-  let {albumDetailsOpen, player: {deviceId, loading}}: StoreData.state = state;
+  let {albumDetailsOpen, albumDataLoading, player: {deviceId, loading}}: StoreData.state = state;
 
   React.useEffect1(
     () => {
@@ -56,11 +59,13 @@ let make = () => {
     {albumDetailsOpen
        ? <div className=Styles.overlay onClick={_ => CloseAlbumDetails->dispatch} />
        : ReasonReact.null}
+    {loading || albumDataLoading
+       ? <div className=Styles.overlay> <LoadingSpinner /> </div> : ReasonReact.null}
     <AlbumDetails />
     <div className={Styles.main(albumDetailsOpen)}>
       {switch (deviceId->String.length) {
-       | 0 => loading ? <LoadingSpinner /> : <LoginButton />
-       | _ => loading ? <LoadingSpinner /> :  <Albums />
+       | 0 => <LoginButton />
+       | _ => <Albums />
        }}
     </div>
   </React.Fragment>;

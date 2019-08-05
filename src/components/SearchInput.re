@@ -7,50 +7,29 @@ module Styles = {
     style([
       position(`relative),
       display(`flex),
-      backgroundColor(hex("8c3028")),
-      color(hex("fff")),
-      overflow(`hidden),
-    ]);
-
-  let infoContainer =
-    style([
-      zIndex(1),
-      display(`flex),
       justifyContent(`center),
       flexDirection(`column),
-      flexGrow(1.0),
-      padding(px(20)),
-      background(
+      backgrounds([
         radialGradient([
           (`percent(0.0), rgba(0, 0, 0, 0.0)),
           (`percent(100.0), rgba(0, 0, 0, 0.5)),
         ]),
-      ),
+        hex("282828"),
+      ]),
+      padding(px(20)),
+      color(hex("fff")),
+      overflow(`hidden),
     ]);
 
-  let title = style([fontWeight(`num(600)), fontSize(px(32))]);
-
-  let image =
-    style([
-      position(`absolute),
-      left(`percent(-10.0)),
-      width(`percent(120.0)),
-      filter([`blur(px(10)), `brightness(50.0)]),
-      transition(
-        ~duration=500,
-        ~delay=0,
-        ~timingFunction=cubicBesier(0.15, 1.0, 0.33, 1.0),
-        "transform",
-      ),
-    ]);
+  let title = style([fontWeight(`num(700)), fontSize(px(28))]);
 
   let input =
     style([
       borderWidth(`zero),
-      borderBottom(px(2), `solid, hex("fff")),
+      borderBottom(px(1), `solid, hex("fff")),
       padding2(~v=px(7), ~h=`zero),
       marginBottom(px(10)),
-      fontSize(px(22)),
+      fontSize(px(20)),
       color(hex("fff")),
       backgroundColor(`transparent),
       backgroundImage(
@@ -71,8 +50,6 @@ module Styles = {
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
-  let (bgItem, setBgItem) = React.useState(() => None);
-  let {albumData: {items, total}}: StoreData.state = state;
 
   let handleSubmit = e => {
     ReactEvent.Form.preventDefault(e);
@@ -80,30 +57,11 @@ let make = () => {
     Search(keywords)->dispatch;
   };
 
-  React.useEffect1(
-    () => {
-      let item =
-        switch (List.length(items)) {
-        | 0 => None
-        | length => Some(List.nth(items, Random.int(length)).images->List.hd)
-        };
-      setBgItem(_ => item);
-      None;
-    },
-    [|items|],
-  );
-
   <form className=Styles.container onSubmit=handleSubmit>
-    {switch (bgItem) {
-     | Some(item) => <img className=Styles.image src={item.url} alt="" />
-     | None => ReasonReact.null
-     }}
-    <div className=Styles.infoContainer>
-      <span className=Styles.title> {ReasonReact.string("Search")} </span>
-      <input name="keywords" placeholder="album title" className=Styles.input />
-      <span className=Styles.resultCount>
-        {ReasonReact.string(total->string_of_int ++ " results")}
-      </span>
-    </div>
+    <span className=Styles.title> {ReasonReact.string("Search")} </span>
+    <input name="keywords" placeholder="artist or album" className=Styles.input />
+    <span className=Styles.resultCount>
+      {ReasonReact.string(state.albumData.total->string_of_int ++ " results")}
+    </span>
   </form>;
 };

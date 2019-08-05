@@ -17,10 +17,12 @@ module Styles = {
       overflow(`hidden),
     ]);
 
-  let image =
+  let image(ready) =
     style([
       width(`percent(100.0)),
       filter([`saturate(50.0)]),
+      opacity(ready ? 1.0 : 0.0),
+      verticalAlign(`middle),
       transition(
         ~duration=500,
         ~delay=0,
@@ -67,11 +69,12 @@ module Styles = {
 [@react.component]
 let make = (~album as {name, id, images, artists}: StoreData.album) => {
   let (_, dispatch) = React.useContext(storeContext);
+  let (imgReady, setImgReady) = React.useState(_ => false);
   let image = List.hd(images);
   let artist = List.hd(artists);
 
   <div className=Styles.container onClick={_ => FetchAlbumDetails(id)->dispatch}>
-    <img className=Styles.image src={image.url} alt=name />
+    <img className=Styles.image(imgReady) onLoad={_ => setImgReady(_ => true)} src={image.url} alt=name />
     <div className=Styles.info>
       <h2 className=Styles.title> {React.string(name)} </h2>
       <span> {React.string(artist.name)} </span>

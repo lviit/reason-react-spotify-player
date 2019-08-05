@@ -67,7 +67,7 @@ let make = () => {
   <div className=Styles.container>
     <div className=Styles.nowPlaying>
       <h1 className={Styles.title(state.currentTrack)}>
-        {ReasonReact.string("Reason Spotify client")}
+        {ReasonReact.string("Reason React Spotify Player")}
       </h1>
       <span className={Styles.trackInfo(state.currentTrack)}>
         {switch (state.currentTrack) {
@@ -82,6 +82,6 @@ let make = () => {
          }}
       </span>
     </div>
-    <div className=Styles.right> <Controls /> <Visualizer /> </div>
+    <div className=Styles.right> <Controls /> /* <Visualizer /> */ </div>
   </div>;
 };
