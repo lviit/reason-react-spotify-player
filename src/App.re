@@ -39,12 +39,14 @@ module Styles = {
   );
 
   global("input", [letterSpacing(pxFloat(0.5))]);
+  global("a", [color(hex("24292e"))]);
 };
 
 [@react.component]
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
   let {albumDetailsOpen, albumDataLoading, player: {deviceId, loading}}: StoreData.state = state;
+  let showLogin = deviceId->String.length === 0 && !loading;
 
   React.useEffect1(
     () => {
@@ -61,12 +63,10 @@ let make = () => {
        : ReasonReact.null}
     {loading || albumDataLoading
        ? <div className=Styles.overlay> <LoadingSpinner /> </div> : ReasonReact.null}
+    {showLogin ? <div className=Styles.overlay> <Login /> </div> : ReasonReact.null}
     <AlbumDetails />
-    <div className={Styles.main(albumDetailsOpen)}>
-      {switch (deviceId->String.length) {
-       | 0 => <LoginButton />
-       | _ => <Albums />
-       }}
+    <div className={Styles.main(albumDetailsOpen || showLogin || loading || albumDataLoading)}>
+      <Albums />
     </div>
   </React.Fragment>;
 };

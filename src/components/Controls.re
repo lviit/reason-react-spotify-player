@@ -54,6 +54,7 @@ let make = () => {
       max={duration->string_of_int}
       value={progress->string_of_int}
       onChange=handleProgressChange
+      ariaLabel="progress"
     />
     <span className=Styles.progress> {progress->formatDuration->ReasonReact.string} </span>
     <Button icon=Button.Prev action={_ => dispatch(Prev)} size="32" />

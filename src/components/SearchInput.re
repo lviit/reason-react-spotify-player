@@ -58,8 +58,8 @@ let make = () => {
   };
 
   <form className=Styles.container onSubmit=handleSubmit>
-    <span className=Styles.title> {ReasonReact.string("Search")} </span>
-    <input name="keywords" placeholder="artist or album" className=Styles.input />
+    <label htmlFor="keywords" className=Styles.title> {ReasonReact.string("Search")} </label>
+    <input id="keywords" name="keywords" placeholder="artist or album" className=Styles.input />
     <span className=Styles.resultCount>
       {ReasonReact.string(state.albumData.total->string_of_int ++ " results")}
     </span>

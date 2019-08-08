@@ -9,17 +9,25 @@ module Styles = {
       gridTemplateColumns([`repeat((`autoFill, `minmax((px(250), fr(1.0)))))]),
       gridGap(px(3)),
       unsafe("grid-auto-rows", "1fr"),
-      selector("& > *:first-child", [
-        gridRow(1,1),
-        gridColumn(1,1),
-      ]),
+      selector("& > *:first-child", [gridRow(1, 1), gridColumn(1, 1)]),
       before([
         unsafe("content", ""),
         width(`zero),
         paddingBottom(`percent(100.0)),
-        gridRow(1,1),
-        gridColumn(1,1),
-      ])
+        gridRow(1, 1),
+        gridColumn(1, 1),
+      ]),
+    ]);
+
+  let placeHolderTile =
+    style([
+      backgrounds([
+        radialGradient([
+          (`percent(0.0), rgba(0, 0, 0, 0.0)),
+          (`percent(100.0), rgba(0, 0, 0, 0.5)),
+        ]),
+        hex("6b6b6b"),
+      ]),
     ]);
 };
 
@@ -27,7 +35,10 @@ module Styles = {
 let make = () => {
   let (state, dispatch) = React.useContext(storeContext);
   let {albumData: {items}, player: {deviceId}}: StoreData.state = state;
-  let tiles = [<SearchInput />, ...List.map(album => <Album album key={album.id} />, items)];
+  let tiles =
+    List.length(items) > 0
+      ? [<SearchInput />, ...List.map(album => <Album album key={album.id} />, items)]
+      : <div className=Styles.placeHolderTile /> |> Belt.List.make(50);
 
   React.useEffect1(
     () => {
@@ -40,7 +51,5 @@ let make = () => {
     [|deviceId|],
   );
 
-  <div>
-    <div className=Styles.container> {tiles |> Array.of_list |> ReasonReact.array} </div>
-  </div>;
+  <div className=Styles.container> {tiles |> Array.of_list |> ReasonReact.array} </div>;
 };
